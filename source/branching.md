@@ -1,5 +1,5 @@
 How to work in branches
 =======================
 
-git branch
-git switch
+git branch - list, create, or delete branches
+git switch - switch branches
