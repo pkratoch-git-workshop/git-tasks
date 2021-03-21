@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp .task.py task.py
