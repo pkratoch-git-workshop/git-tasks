@@ -182,6 +182,68 @@ Then the result should look like this:
         print("OK")
 
 
+class ResetHard(Task):
+    branch_names = ['reset-hard-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+================
+Task: reset-hard
+================
+
+Reset the `reset-main` branch to the point right before the last commit. Reset both the index and the working tree, i.e. completely discard all changes introduced by the commit.
+
+If the history looks like this:
+
+            A---B---C---D main
+
+Then the result of resetting to commit B should look like this:
+
+            A---B main
+
+(To show only task-related branches in gitk: gitk --branches=reset-hard-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/reset-hard-main are present in reset-hard-main.
+        new_hexshas = [commit.hexsha for commit in self.iter_commits('reset-hard-main')]
+        new_summaries = [commit.summary for commit in self.iter_commits('reset-hard-main')]
+        skip_first = True
+        for commit in self.iter_commits('origin/reset-hard-main'):
+            if skip_first:
+                skip_first = False
+                continue
+            if commit.hexsha not in new_hexshas:
+                if commit.summary not in new_summaries:
+                    raise TaskCheckException('A commit is missing: %s' % commit.summary)
+                else:
+                    raise TaskCheckException('A commit was unexpectedly modified: %s' % commit.summary)
+
+        # Check the commits count
+        self.check_commits_count('reset-hard-main', 5)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add explanations to the branching commands',
+            'Add basic cheatsheet for working with branches',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatseet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('reset-hard-main')]
+        if main_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in reset-hard-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        print("OK")
+
+
 class Revert(Task):
     branch_names = ['revert-main']
 
@@ -253,6 +315,7 @@ def main():
     task_classes = {
         'merge': Merge,
         'rebase': Rebase,
+        'reset-hard': ResetHard,
         'revert': Revert,
     }
 
