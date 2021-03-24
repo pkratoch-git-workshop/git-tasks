@@ -182,11 +182,78 @@ Then the result should look like this:
         print("OK")
 
 
+class Revert(Task):
+    branch_names = ['revert-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+============
+Task: revert
+============
+
+In a branch `revert-main`, there is a commit with summary "Make the cheetsheet into a nice table" that breaks the markdown in the cheetsheet.md file. Revert this commit.
+
+Note that you don't want to change the history of the `revert-main` branch, but to create new commit that is opposite to the one you want to undo.
+
+If the history looks like this:
+
+            A---B---C---D main
+
+Then the result should look like this:
+
+            A---B---C---D---B' main
+
+(To show only task-related branches in gitk: gitk --branches=revert-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/revert-main are present in revert-main.
+        self.check_old_commits_unchanged('origin/revert-main', 'revert-main')
+
+        # Check the commits count
+        self.check_commits_count('revert-main', 7)
+
+        # Check the commit order
+        expected_summaries = [
+            '<REVERT COMMIT>',
+            'Add explanations to the branching commands',
+            'Add basic cheatsheet for working with branches',
+            'Make the cheetsheet into a nice table',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatseet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('revert-main')]
+        if main_summaries[1:] != expected_summaries[1:]:
+            raise TaskCheckException(
+                'Unexpected commits in revert-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        # Check the last commit is the correct reverted commit by comparing diffs
+        commits = [commit for commit in self.iter_commits('revert-main')]
+        expected_diffs = commits[4].diff(commits[3], create_patch=True)
+        revert_commit_diffs = commits[0].diff(commits[1], create_patch=True)
+        if revert_commit_diffs != expected_diffs:
+            expected_patch = '\n'.join([diff.diff.decode('utf8') for diff in expected_diffs])
+            actual_patch = '\n'.join([diff.diff.decode('utf8') for diff in revert_commit_diffs])
+            raise TaskCheckException(
+                'The last commit is not the reverted commit.\n\n'
+                'Expected diff:\n\n%s\nActual diff:\n\n%s' % (expected_patch, actual_patch))
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
         'merge': Merge,
         'rebase': Rebase,
+        'revert': Revert,
     }
 
     parser = argparse.ArgumentParser()
