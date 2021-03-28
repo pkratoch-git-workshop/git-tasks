@@ -7,10 +7,12 @@ Basic commands
 - git add     - add file contents to the index
 - git commit  - record changes to the repository
 
+```
  +-----------+          +---------+             +------------+
  |  working  | -------> | staging | ----------> | repository |
  | directory | git add  |  area   | git commit  |            |
  +-----------+          +---------+             +------------+
+```
 
 
 Viewing changes
