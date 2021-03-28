@@ -61,6 +61,64 @@ class Task():
             raise TaskCheckException(msg.format(branch=branch, diff=diff, quantifier='less'))
 
 
+class CherryPick(Task):
+    branch_names = ['cherry-pick-main', 'cherry-pick-feature']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=================
+Task: cherry-pick
+=================
+
+Cherry-pick all the commits that modified `source/cheetsheet.md` file in the `cherry-pick-feature` branch into the `cherry-pick-main` branch.
+
+If the history looks like this:
+
+                  A---B---C feature
+                 /
+            D---E---F---G main
+
+Then the result should look like this:
+
+                  A---B---C feature
+                 /
+            D---E---F---G---B` main
+
+(To show only task-related branches in gitk: gitk --branches=cherry-pick-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/cherry-pick-main and origin/cherry-pick-feature branches are present.
+        self.check_old_commits_unchanged('origin/cherry-pick-main', 'cherry-pick-main')
+        self.check_old_commits_unchanged('origin/cherry-pick-feature', 'cherry-pick-feature')
+
+        # Check the commits count
+        self.check_commits_count('cherry-pick-feature', 9)
+        self.check_commits_count('cherry-pick-main', 6)
+
+        # Check the commit order
+        expected_summaries = [
+            'Escape the diagram in cheatsheet',
+            'Add picture of the basic git workflow',
+            'Add commands for working with remote rpositories',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatseet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('cherry-pick-main')]
+        if main_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in cherry-pick-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        print("OK")
+
+
 class Merge(Task):
     branch_names = ['merge-main', 'merge-feature']
 
@@ -313,6 +371,7 @@ Then the result should look like this:
 def main():
     # Define tasks:
     task_classes = {
+        'cherry-pick': CherryPick,
         'merge': Merge,
         'rebase': Rebase,
         'reset-hard': ResetHard,
