@@ -13,11 +13,11 @@ Git Cheatsheet
 - git log     - show commit logs
 - git show    - show various types of objects
 
-- git push    - update remote refs along with associated objects
-- git fetch   - download objects and refs from another repository
-
 - git branch   - list, create, or delete branches
 - git checkout - switch branches or restore working tree files
 - git merge    - join two or more development histories together
 - git rebase   - reapply commits on top of another base tip
+
+- git push    - update remote refs along with associated objects
+- git fetch   - doload objects and refs from another repository
 
