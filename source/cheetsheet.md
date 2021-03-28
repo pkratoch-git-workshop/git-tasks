@@ -13,3 +13,6 @@ Git Cheatsheet
 - git log     - show commit logs
 - git show    - show various types of objects
 
+- git push    - update remote refs along with associated objects
+- git fetch   - download objects and refs from another repository
+
