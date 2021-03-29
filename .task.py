@@ -72,7 +72,7 @@ class CherryPick(Task):
 Task: cherry-pick
 =================
 
-Cherry-pick all the commits that modified `source/cheetsheet.md` file in the `cherry-pick-feature` branch into the `cherry-pick-main` branch.
+Cherry-pick all the commits that modified `source/cheatsheet.md` file in the `cherry-pick-feature` branch into the `cherry-pick-main` branch.
 
 If the history looks like this:
 
@@ -106,7 +106,7 @@ Then the result should look like this:
             'Add commands for working with remote rpositories',
             'Add explanations to individual commands',
             'Add commands for inspecting the repo',
-            'Add cheatseet with basic git commands',
+            'Add cheatsheet with basic git commands',
         ]
 
         main_summaries = [commit.summary for commit in self.iter_commits('cherry-pick-main')]
@@ -223,7 +223,7 @@ Then the result should look like this:
             'Add commands for working with remote rpositories',
             'Add explanations to individual commands',
             'Add commands for inspecting the repo',
-            'Add cheatseet with basic git commands',
+            'Add cheatsheet with basic git commands',
         ]
 
         main_summaries = [commit.summary for commit in self.iter_commits('rebase-main')]
@@ -289,7 +289,7 @@ Then the result of resetting to commit B should look like this:
             'Add basic cheatsheet for working with branches',
             'Add explanations to individual commands',
             'Add commands for inspecting the repo',
-            'Add cheatseet with basic git commands',
+            'Add cheatsheet with basic git commands',
         ]
 
         main_summaries = [commit.summary for commit in self.iter_commits('reset-hard-main')]
@@ -313,7 +313,7 @@ class Revert(Task):
 Task: revert
 ============
 
-In a branch `revert-main`, there is a commit with summary "Make the cheetsheet into a nice table" that breaks the markdown in the cheetsheet.md file. Revert this commit.
+In a branch `revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
 
 Note that you don't want to change the history of the `revert-main` branch, but to create new commit that is opposite to the one you want to undo.
 
@@ -341,10 +341,10 @@ Then the result should look like this:
             '<REVERT COMMIT>',
             'Add explanations to the branching commands',
             'Add basic cheatsheet for working with branches',
-            'Make the cheetsheet into a nice table',
+            'Make the cheatsheet into a nice table',
             'Add explanations to individual commands',
             'Add commands for inspecting the repo',
-            'Add cheatseet with basic git commands',
+            'Add cheatsheet with basic git commands',
         ]
 
         main_summaries = [commit.summary for commit in self.iter_commits('revert-main')]
