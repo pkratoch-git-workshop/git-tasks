@@ -2,7 +2,12 @@
 
 ## How to solve tasks
 
-Before starting the first task, run `init-tasks` to make the `task.py` script available.
+### Prerequisites
+
+1. Enter the `sudo dnf install python3-GitPython` command to install necessary dependencies.
+1. Before starting the first task, run `init-tasks` to make the `task.py` script available.
+
+## Working with tasks
 
 1. Pick a task from the list below.
 1. Run a script to start a task: `python3 task.py <taskname> start`
