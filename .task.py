@@ -367,6 +367,113 @@ Then the result should look like this:
 
         print("OK")
 
+class ChangeMessage(Task):
+    branch_names = ["change-message-tasks"]
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+====================
+Task: change-message
+====================
+
+In a branch `change-message-tasks`, there are several commits that make up a complete poem by Emily Dickinson. The very first commit
+of the branch has a wrong commit message saying `Add title and author`. 
+
+Use interactive rebase to replace the commit message, so that the new message is `Add After Great Pain by Emily Dickinson`.
+
+Make sure that the commit history remains unchanged, except for this one commit message.
+
+""")
+
+    def check(self):
+        # Check all commits from the origin/revert-main are present in revert-main.
+        self.check_old_commits_unchanged('origin/change-message-tasks', 'change-message-tasks')
+
+        # Check the commits count
+        self.check_commits_count('change-message-tasks', 2)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add text.',
+            "Add 'After Great Pain' by Emily Dickinson.",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('change-message-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of new commits in change-message-main branch differs from the expected number.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        # Check that the commit message has been changed.
+        if main_summaries[1] != expected_summaries[1]:
+            raise TaskCheckException(
+                'The commit message seems not be changed correctly.\n'
+                'Current message: %s\nExpected message: %s' % (main_summaries[1], expected_summaries[1]))
+
+        print("OK")
+
+
+class SquashCommit(Task):
+    branch_names = ["squash-commits-tasks"]
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+====================
+Task: squash-commits
+====================
+
+In a branch `squash-commits-tasks`, there are several commits that make up a complete poem by Emily Dickinson. Before we merge the
+content of this branch into `main`, we would like to squash the commits so that the whole added content is only represented by
+the very first commit. All following commits should be squashed into the first one. 
+
+Use interactive rebase to squash the commits, so that there is only the very first commit left in the branch, while the content
+of the branch remains unchanged.
+
+Make sure that the commit history remains unchanged, except for this one commit message.
+
+""")
+
+    def check(self):
+
+        # Check the commits count
+        self.check_commits_count('squash-commits-tasks', 1)
+
+        # Check the commit order.
+        expected_summaries = [
+            "Add 'Fame is a bee' by Emily Dickinson.",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('squash-commits-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of new commits in squash-commits-tasks branch differs from the expected number.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        if main_summaries[0] != "Add 'Fame is a bee' by Emily Dickinson.":
+            raise TaskCheckException(
+                'The message of the first commit has changed, but it should be the same.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+             )
+
+        # Check that there is no difference in content between the original and the squashed repository.
+        original = [commit for commit in self.iter_commits('origin/squash-commits-tasks')]
+        new = [commit for commit in self.iter_commits('squash-commits-tasks')]
+
+        diff = original[0].diff(new[0], create_patch=True)
+
+        if diff:
+            raise TaskCheckException(
+                'The content of the squashed branch is different from the original branch.\n'
+                'See the diff: \n%s' % diff[0])
+
+        print("OK")
+
 
 def main():
     # Define tasks:
@@ -376,6 +483,8 @@ def main():
         'rebase': Rebase,
         'reset-hard': ResetHard,
         'revert': Revert,
+        'change-message': ChangeMessage,
+        'squash-commits': SquashCommit,
     }
 
     parser = argparse.ArgumentParser()
