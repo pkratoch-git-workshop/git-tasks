@@ -499,8 +499,6 @@ the very first commit. All following commits should be squashed into the first o
 Use interactive rebase to squash the commits, so that there is only the very first commit left in the branch, while the content
 of the branch remains unchanged.
 
-Make sure that the commit history remains unchanged, except for this one commit message.
-
 """)
 
     def check(self):
@@ -539,7 +537,261 @@ Make sure that the commit history remains unchanged, except for this one commit 
 
         print("OK")
 
+class ReorganizeCommits(Task):
+    branch_names = ["reorganize-commits-tasks"]
 
+    def start(self):
+        self.reset_branches()
+
+        print("""
+========================
+Task: reorganize-commits
+========================
+
+In a branch `reorganize-commits-tasks`, there are several commits that make up two complete poems by Emily Dickinson. Before we merge the
+content of this branch into `main`, we would like to squash the commits so that the whole added content is only represented by
+two commits, each one for a particular poem.  
+
+Use interactive rebase to reorganize, squash and reword the commits, so that there are only two commits left in the branch, while the content
+of the branch remains unchanged.
+
+The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.`
+
+""")
+
+    def check(self):
+
+        # Check the commits count
+        self.check_commits_count('reorganize-commits-tasks', 2)
+
+        # Check the commit order.
+        expected_summaries = [
+            "Poem 2: Add a poem.",
+            "Poem 1: Add a poem.",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('reorganize-commits-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of new commits in this branch differs from the expected number.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        if main_summaries[0] != "Poem 2: Add a poem.":
+            raise TaskCheckException(
+                'The message of the second commit differs from what is expected.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+             )
+
+        if main_summaries[1] != "Poem 1: Add a poem.":
+            raise TaskCheckException(
+                'The message of the first commit differs from what is expected.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[1], main_summaries[1])
+             )
+
+        # Check that there is no difference in content between the original and the squashed repository.
+        original = [commit for commit in self.iter_commits('origin/reorganize-commits-tasks')]
+        new = [commit for commit in self.iter_commits('reorganize-commits-tasks')]
+
+        diff = original[0].diff(new[0], create_patch=True)
+
+        if diff:
+            raise TaskCheckException(
+                'The content of the squashed branch is different from the original branch.\n'
+                'See the diff: \n%s' % diff[0])
+
+        print("OK")
+
+
+class CommitAmend(Task):
+    branch_names = ["commit-amend-tasks"]
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+==================
+Task: commit-amend
+==================
+
+In the branch `commit-amend-tasks`, there is one commit that makes up a complete poem by Emily Dickinson. Unfortunately, one of the
+writers made a typo and left this mistake in the name of the author which is `Elimy` but should be `Emily`. Before we merge the
+content of this branch into `main`, we would like to correct the mistake before we do so.   
+
+Since this is only a minor change and we have already squashed all the commits in the branch, do not produce an extra commit, but
+add the change to the existing commit instead. 
+
+After the change, there should be one commit only in the branch with the same commit message as before!
+
+""")
+
+    def check(self):
+
+        # Check the commits count
+        self.check_commits_count('commit-amend-tasks', 1)
+
+        # Check the commit order.
+        expected_summaries = [
+            "Add poem: Forever is composed of nows",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('commit-amend-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of new commits in this branch differs from the expected number.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        if main_summaries[0] != "Add poem: Forever is composed of nows":
+            raise TaskCheckException(
+                'The message of the commit differs from what is expected.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+             )
+
+        # Check that there is a difference in content between the original and the new commit.
+        original = [commit for commit in self.iter_commits('origin/commit-amend-tasks')]
+        new = [commit for commit in self.iter_commits('commit-amend-tasks')]
+
+        diff = original[0].diff(new[0], create_patch=True)
+        detail = str(diff[0].diff)
+
+        if not diff:
+            raise TaskCheckException(
+                'The content of the branch seems not to be corrected! The text is the same as it was before.\n')
+        else:
+            if "+*By Emily Dickinson*" not in detail:
+                raise TaskCheckException(
+                    'The mistake was not corrected as expected.\n\n'
+                    'See the diff:\n%s' % diff[0])
+
+        print("OK")
+
+class Stash(Task):
+    branch_names = ["stash-tasks"]
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+===========
+Task: stash
+===========
+
+In the branch `stash-tasks`, there is one commit that makes up a skeleton for your own poem. You should change the skeleton file into a text 
+of your liking. Change some lines and save the file.
+
+Unfortunately, before you could commit and push the changes, you have learnt that the remote branch has been rebased and you need to
+reset your local branch to the remote branch, but you do not want to lose any changes you have already made in your local branch.
+
+Use stash to protect your changes and reset local branch onto the remote one.
+
+""")
+
+    def check(self):
+
+        # Check the commits count
+        self.check_commits_count('stash-tasks', 1)
+
+        # Check the commit order.
+        expected_summaries = [
+            "Add a poem skeleton.",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('stash-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of commits in this branch differs from the expected number. Reset the branch.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        if main_summaries[0] != "Add a poem skeleton.":
+            raise TaskCheckException(
+                'The message of the commit differs from what is expected. Reset the branch.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+             )
+
+        # Check that there is a difference in content between the original and the new commit.
+        original = [commit for commit in self.iter_commits('origin/stash-tasks')]
+        new = [commit for commit in self.iter_commits('stash-tasks')]
+
+        # Check that there is a stash saved.
+        direct = self.repo.git
+        stash = direct.stash('list')
+
+        if not stash:
+            raise TaskCheckException(
+                'Nothing has been put into stash. The content is not protected.\n\n'
+                'Expected was something like "stash@{0}: WIP on stash-tasks: ..."')
+
+        print("OK")
+
+
+class ApplyStash(Task):
+    branch_names = ["apply-stash-tasks"]
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=================
+Task: apply-stash
+=================
+
+In the branch `apply-stash-tasks`, there is one commit that makes up a skeleton for your own poem. You should change the skeleton file into a text 
+of your liking. Change some lines and save the file.
+
+Unfortunately, before you could commit and push the changes, you have learnt that the remote branch has been rebased and you need to
+reset your local branch to the remote branch, but you do not want to lose any changes you have already made in your local branch.
+
+Use stash to protect your changes and reset local branch onto the remote one. Then apply the stashed content and delete it from the stash.
+Stage the new content and commit it. Make the commit message be 'Add my favourite poem.'
+
+""")
+
+    def check(self):
+
+        # Check the commits count
+        self.check_commits_count('apply-stash-tasks', 2)
+
+        # Check the commit order.
+        expected_summaries = [
+            "Add my favourite poem.",
+            "Add a poem skeleton.",
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('apply-stash-tasks')]
+        if len(main_summaries) != len(expected_summaries):
+            raise TaskCheckException(
+                'The number of commits in this branch differs from the expected number.'
+                'Expected commit number: %s' % (len(expected_summaries))
+            )
+
+        if main_summaries[0] != "Add my favourite poem.":
+            raise TaskCheckException(
+                'The message of the commit differs from what is expected.\n'
+                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+             )
+
+        # Check that there is a difference in content between the original and the new commit.
+        original = [commit for commit in self.iter_commits('origin/apply-stash-tasks')]
+        new = [commit for commit in self.iter_commits('apply-stash-tasks')]
+
+        diff = original[0].diff(new[0], create_patch=True)
+
+        if not diff:
+            raise TaskCheckException(
+                'The content of the branch seems not to be correctly applied from stash!')
+
+        # Check that there is a stash saved.
+        direct = self.repo.git
+        stash = direct.stash('list')
+
+        if stash:
+            raise TaskCheckException(
+                'There is something in the stash, but the stash should be empty.\n\n'
+                'See stash:\n%s' % stash)
+
+        print("OK")
 class RevertConflict(Task):
     branch_names = ['revert-conflict-main']
 
@@ -634,7 +886,10 @@ def main():
         'revert': Revert,
         'change-message': ChangeMessage,
         'squash-commits': SquashCommit,
-        'revert-conflict': RevertConflict,
+        'reorganize-commits': ReorganizeCommits,
+        'commit-amend': CommitAmend,
+        'stash': Stash,
+        'apply-stash': ApplyStash,
     }
 
     parser = argparse.ArgumentParser()
