@@ -475,6 +475,89 @@ Make sure that the commit history remains unchanged, except for this one commit 
         print("OK")
 
 
+class RevertConflict(Task):
+    branch_names = ['revert-conflict-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=====================
+Task: revert-conflict
+=====================
+
+In a branch `revert-conflict-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
+
+Note that you don't want to change the history of the `revert-conflict-main` branch, but to create new commit that is opposite to the one you want to undo.
+
+In this scenario, you will encounter a conflict and will need to resolve it.
+
+If the history looks like this:
+
+            A---B---C---D main
+
+Then the result should look like this:
+
+            A---B---C---D---B' main
+
+(To show only task-related branches in gitk: gitk --branches=revert-conflict-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/revert-conflict-main are present in revert-conflict-main.
+        self.check_old_commits_unchanged('origin/revert-conflict-main', 'revert-conflict-main')
+
+        # Check the commits count
+        self.check_commits_count('revert-conflict-main', 8)
+
+        # Check the commit order
+        expected_summaries = [
+            '<REVERT COMMIT>',
+            'Add picture of the basic git workflow',
+            'Add explanations to the branching commands',
+            'Add basic cheatsheet for working with branches',
+            'Make the cheatsheet into a nice table',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('revert-conflict-main')]
+        if main_summaries[1:] != expected_summaries[1:]:
+            raise TaskCheckException(
+                'Unexpected commits in revert-conflict-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        # Check the last commit is the correct reverted commit
+        expected_lines = [
+            'Git Cheatsheet',
+            '==============',
+            '- git add     - add file contents to the index',
+            '- git commit  - record changes to the repository',
+            '```',
+            '+-----------+          +---------+             +------------+',
+            '|  working  | -------> | staging | ----------> | repository |',
+            '| directory | git add  |  area   | git commit  |            |',
+            '+-----------+          +---------+             +------------+',
+            '```',
+            '- git status  - show the working tree status',
+            '- git log     - show commit logs',
+            '- git show    - show various types of objects',
+        ]
+        self.repo.git.checkout('revert-conflict-main')
+        with open('source/cheatsheet.md') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        if lines != expected_lines:
+            raise TaskCheckException(
+                'The content of source/cheatsheet.md is different than expected. '
+                'Expected lines (without empty lines):\n%s' % '\n'.join(expected_lines)
+            )
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -485,6 +568,7 @@ def main():
         'revert': Revert,
         'change-message': ChangeMessage,
         'squash-commits': SquashCommit,
+        'revert-conflict': RevertConflict,
     }
 
     parser = argparse.ArgumentParser()

@@ -32,4 +32,5 @@ To see only task-related branches in gitk: `gitk --branches=<taskname>-*`
 1. cherry-pick
 1. reset-hard
 1. revert
+1. revert-conflict
 
