@@ -35,4 +35,6 @@ To see only task-related branches in gitk: `gitk --branches=<taskname>-*`
 1. change-message
 1. squash-commits
 1. reorganize-commits
+1. stash
+1. apply-stash
 
