@@ -119,6 +119,71 @@ Then the result should look like this:
         print("OK")
 
 
+class ConflictCherryPick(Task):
+    branch_names = ['conflict-cherry-pick-main', 'conflict-cherry-pick-feature']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+==========================
+Task: conflict-cherry-pick
+==========================
+
+Cherry-pick all the commits that modified `source/cheatsheet.md` file in the `conflict-cherry-pick-feature` branch into the `conflict-cherry-pick-main` branch.
+
+If the history looks like this:
+
+                  A---B---C feature
+                 /
+            D---E---F---G main
+
+Then the result should look like this:
+
+                  A---B---C feature
+                 /
+            D---E---F---G---B` main
+
+(To show only task-related branches in gitk: gitk --branches=conflict-cherry-pick-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/conflict-cherry-pick-main and
+        # origin/conflict-cherry-pick-feature branches are present.
+        self.check_old_commits_unchanged(
+            'origin/conflict-cherry-pick-main', 'conflict-cherry-pick-main'
+        )
+        self.check_old_commits_unchanged(
+            'origin/conflict-cherry-pick-feature', 'conflict-cherry-pick-feature'
+        )
+
+        # Check the commits count
+        self.check_commits_count('conflict-cherry-pick-feature', 8)
+        self.check_commits_count('conflict-cherry-pick-main', 6)
+
+        # Check the commit order
+        expected_summaries = [
+            'Escape the diagram in cheatsheet',
+            'Add picture of the basic git workflow',
+            'Add commands for working with remote rpositories',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        main_summaries = [
+            commit.summary for commit in self.iter_commits('conflict-cherry-pick-main')
+        ]
+        if main_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in conflict-cherry-pick-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        print("OK")
+
+
 class Merge(Task):
     branch_names = ['merge-main', 'merge-feature']
 
@@ -562,6 +627,7 @@ def main():
     # Define tasks:
     task_classes = {
         'cherry-pick': CherryPick,
+        'conflict-cherry-pick': ConflictCherryPick,
         'merge': Merge,
         'rebase': Rebase,
         'reset-hard': ResetHard,
