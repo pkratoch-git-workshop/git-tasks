@@ -11,3 +11,13 @@ From our gross eyes.
 ’Tis a fond Ambush –  
 Just to make Bliss  
 Earn her own surprise!
+
+But – should the play  
+Prove piercing earnest –  
+Should the glee – glaze –  
+In Death’s – stiff – stare –
+
+Would not the fun  
+Look too expensive!  
+Would not the jest –  
+Have crawled too far!
