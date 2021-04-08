@@ -316,7 +316,7 @@ class ResetHard(Task):
 Task: reset-hard
 ================
 
-Reset the `reset-main` branch to the point right before the last commit. Reset both the index and the working tree, i.e. completely discard all changes introduced by the commit.
+Reset the `reset-hard-main` branch to the point right before the last commit. Reset both the index and the working tree, i.e. completely discard all changes introduced by the commit.
 
 If the history looks like this:
 
@@ -363,6 +363,64 @@ Then the result of resetting to commit B should look like this:
                 'Unexpected commits in reset-hard-main branch. '
                 'Expected summaries:\n%s' % '\n'.join(expected_summaries)
             )
+
+        print("OK")
+
+
+class ResetSoft(Task):
+    branch_names = ['reset-soft-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+================
+Task: reset-soft
+================
+
+Reset the `reset-soft-main` branch to the point right before the last commit, but keep the index and the working tree.
+
+(To show only task-related branches in gitk: gitk --branches=reset-soft-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/reset-soft-main are present in reset-soft-main.
+        new_hexshas = [commit.hexsha for commit in self.iter_commits('reset-soft-main')]
+        new_summaries = [commit.summary for commit in self.iter_commits('reset-soft-main')]
+        skip_first = True
+        for commit in self.iter_commits('origin/reset-soft-main'):
+            if skip_first:
+                skip_first = False
+                continue
+            if commit.hexsha not in new_hexshas:
+                if commit.summary not in new_summaries:
+                    raise TaskCheckException('A commit is missing: %s' % commit.summary)
+                else:
+                    raise TaskCheckException('A commit was unexpectedly modified: %s' % commit.summary)
+
+        # Check the commits count
+        self.check_commits_count('reset-soft-main', 5)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add explanations to the branching commands',
+            'Add basic cheatsheet for working with branches',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('reset-soft-main')]
+        if main_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in reset-soft-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        # Check index
+        if self.repo.index.diff(next(self.iter_commits('origin/reset-soft-main'))):
+            raise TaskCheckException('The index is not the same as the resetted commit.')
 
         print("OK")
 
@@ -932,6 +990,7 @@ def main():
         'merge': Merge,
         'rebase': Rebase,
         'reset-hard': ResetHard,
+        'reset-soft': ResetSoft,
         'revert': Revert,
         'change-message': ChangeMessage,
         'squash-commits': SquashCommit,
