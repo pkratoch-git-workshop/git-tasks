@@ -982,6 +982,56 @@ Create a new branch named `new-branch` on this commit.
         print("OK")
 
 
+class Drop(Task):
+    branch_names = ['drop-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+==========
+Task: drop
+==========
+
+In a branch `drop-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file.
+
+Using an interactive rebase, drop this commit.
+
+If the history looks like this:
+
+            A---B---C---D main
+
+Then the result should look like this:
+
+            A---B---D main
+
+(To show only task-related branches in gitk: gitk --branches=drop-*)
+""")
+
+
+    def check(self):
+        # Check the commits count
+        self.check_commits_count('drop-main', 5)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add explanations to the branching commands',
+            'Add basic cheatsheet for working with branches',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('drop-main')]
+        if main_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in drop-main branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -999,6 +1049,7 @@ def main():
         'stash': Stash,
         'apply-stash': ApplyStash,
         'new-branch': NewBranch,
+        'drop': Drop,
     }
 
     parser = argparse.ArgumentParser()
