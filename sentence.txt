@@ -4,3 +4,4 @@ The quick brown fox jumps over the lazy dog
 
 This is another sentence that will be included in the rebase branch but not merge branch.
 
+This is a sentence that will be merged.
