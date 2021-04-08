@@ -875,6 +875,55 @@ Then the result should look like this:
         print("OK")
 
 
+class NewBranch(Task):
+    branch_names = ['new-branch-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+================
+Task: new-branch
+================
+
+Find a commit in branch `new-branch-main` with a summary "Add commands for working with remote rpositories".
+
+Create a new branch named `new-branch` on this commit.
+""")
+
+
+    def check(self):
+        # Check branch exists
+        if 'new-branch' not in self.repo.references:
+            raise TaskCheckException('Branch "new-branch" does not exist.')
+
+        # Check all commits from the origin/new-branch-main branch are present.
+        self.check_old_commits_unchanged('origin/new-branch-main', 'new-branch-main')
+
+        # Check the commits count
+        self.check_commits_count('new-branch-main', 6)
+        self.check_commits_count('new-branch', 4)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add commands for working with remote rpositories',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        summaries = [commit.summary for commit in self.iter_commits('new-branch')]
+        if summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in new-branch branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        self.check_old_commits_unchanged('new-branch', 'new-branch-main')
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -890,6 +939,7 @@ def main():
         'commit-amend': CommitAmend,
         'stash': Stash,
         'apply-stash': ApplyStash,
+        'new-branch': NewBranch,
     }
 
     parser = argparse.ArgumentParser()
