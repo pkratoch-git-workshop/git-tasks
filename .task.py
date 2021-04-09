@@ -511,9 +511,6 @@ Make sure that the commit history remains unchanged, except for this one commit 
 """)
 
     def check(self):
-        # Check all commits from the origin/revert-main are present in revert-main.
-        self.check_old_commits_unchanged('origin/change-message-tasks', 'change-message-tasks')
-
         # Check the commits count
         self.check_commits_count('change-message-tasks', 2)
 
