@@ -40,7 +40,8 @@ class Task():
             yield commit
 
     def check_old_commits_unchanged(self, old_branch, new_branch):
-        """Check all the commits in old branch are unchanged in the new branch (have the same hexsha)."""
+        """Check all the commits in old branch are unchanged in the new branch
+        (have the same hexsha)."""
         new_hexshas = [commit.hexsha for commit in self.iter_commits(new_branch)]
         new_summaries = [commit.summary for commit in self.iter_commits(new_branch)]
 
@@ -49,12 +50,16 @@ class Task():
                 if commit.summary not in new_summaries:
                     raise TaskCheckException('A commit is missing: %s' % commit.summary)
                 else:
-                    raise TaskCheckException('A commit was unexpectedly modified: %s' % commit.summary)
+                    raise TaskCheckException(
+                        'A commit was unexpectedly modified: %s' % commit.summary
+                    )
 
     def check_commits_count(self, branch, expected_commits_count):
         commits_count = len([commit for commit in self.iter_commits(branch)])
         diff = abs(commits_count - expected_commits_count)
-        msg = 'Unexpected number of commits in branch {branch} ({diff} {quantifier} than expected).'
+        msg = (
+            'Unexpected number of commits in branch {branch} ({diff} {quantifier} than expected).'
+        )
         if commits_count > expected_commits_count:
             raise TaskCheckException(msg.format(branch=branch, diff=diff, quantifier='more'))
         if commits_count < expected_commits_count:
@@ -72,7 +77,9 @@ class CherryPick(Task):
 Task: cherry-pick
 =================
 
-Cherry-pick into the `cherry-pick-main` branch all the commits that modified `source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the `cherry-pick-main` branch.
+Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
+`source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the \
+`cherry-pick-main` branch.
 
 If the history looks like this:
 
@@ -91,7 +98,8 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/cherry-pick-main and origin/cherry-pick-feature branches are present.
+        # Check all commits from the origin/cherry-pick-main and origin/cherry-pick-feature
+        # branches are present.
         self.check_old_commits_unchanged('origin/cherry-pick-main', 'cherry-pick-main')
         self.check_old_commits_unchanged('origin/cherry-pick-feature', 'cherry-pick-feature')
 
@@ -130,7 +138,9 @@ class ConflictCherryPick(Task):
 Task: conflict-cherry-pick
 ==========================
 
-Cherry-pick into the `cherry-pick-main` branch all the commits that modified `source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the `cherry-pick-main` branch.
+Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
+`source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the \
+`cherry-pick-main` branch.
 
 If the history looks like this:
 
@@ -195,7 +205,8 @@ class Merge(Task):
 Task: merge
 ===========
 
-Merge the `merge-feature` branch into the `merge-main` branch (and create a merge commit in the process).
+Merge the `merge-feature` branch into the `merge-main` branch (and create a merge commit in the \
+process).
 
 If the history looks like this:
 
@@ -216,7 +227,8 @@ The merge commit can contain a message describing the whole feature that was mer
 
 
     def check(self):
-        # Check all commits from the origin/merge-main and origin/merge-feature branches are present.
+        # Check all commits from the origin/merge-main and origin/merge-feature branches are
+        # present in merge-main.
         self.check_old_commits_unchanged('origin/merge-main', 'merge-main')
         self.check_old_commits_unchanged('origin/merge-feature', 'merge-main')
 
@@ -238,7 +250,9 @@ The merge commit can contain a message describing the whole feature that was mer
         if last_commit.hexsha in old_hexshas:
             raise TaskCheckException('The last commit is not new: %s' % last_commit.summary)
         if last_commit.summary in old_summaries:
-            raise TaskCheckException('The last commit is probably not new: %s' % last_commit.summary)
+            raise TaskCheckException(
+                'The last commit is probably not new: %s' % last_commit.summary
+            )
 
         print("OK")
 
@@ -273,7 +287,8 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/rebase-main are present in both rebase-main and rebase-feature.
+        # Check all commits from the origin/rebase-main are present in both rebase-main and
+        # rebase-feature.
         self.check_old_commits_unchanged('origin/rebase-main', 'rebase-main')
         self.check_old_commits_unchanged('origin/rebase-main', 'rebase-feature')
 
@@ -316,7 +331,8 @@ class ResetHard(Task):
 Task: reset-hard
 ================
 
-Reset the `reset-hard-main` branch to the point right before the last commit. Reset both the index and the working tree, i.e. completely discard all changes introduced by the commit.
+Reset the `reset-hard-main` branch to the point right before the last commit. Reset both the \
+index and the working tree, i.e. completely discard all changes introduced by the commit.
 
 If the history looks like this:
 
@@ -343,7 +359,9 @@ Then the result of resetting to commit B should look like this:
                 if commit.summary not in new_summaries:
                     raise TaskCheckException('A commit is missing: %s' % commit.summary)
                 else:
-                    raise TaskCheckException('A commit was unexpectedly modified: %s' % commit.summary)
+                    raise TaskCheckException(
+                        'A commit was unexpectedly modified: %s' % commit.summary
+                    )
 
         # Check the commits count
         self.check_commits_count('reset-hard-main', 5)
@@ -378,7 +396,8 @@ class ResetSoft(Task):
 Task: reset-soft
 ================
 
-Reset the `reset-soft-main` branch to the point right before the last commit, but keep the index and the working tree.
+Reset the `reset-soft-main` branch to the point right before the last commit, but keep the index \
+and the working tree.
 
 (To show only task-related branches in gitk: gitk --branches=reset-soft-*)
 """)
@@ -397,7 +416,9 @@ Reset the `reset-soft-main` branch to the point right before the last commit, bu
                 if commit.summary not in new_summaries:
                     raise TaskCheckException('A commit is missing: %s' % commit.summary)
                 else:
-                    raise TaskCheckException('A commit was unexpectedly modified: %s' % commit.summary)
+                    raise TaskCheckException(
+                        'A commit was unexpectedly modified: %s' % commit.summary
+                    )
 
         # Check the commits count
         self.check_commits_count('reset-soft-main', 5)
@@ -436,9 +457,11 @@ class Revert(Task):
 Task: revert
 ============
 
-In a branch `revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
+In a branch `revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" \
+that breaks the markdown in the cheatsheet.md file. Revert this commit.
 
-Note that you don't want to change the history of the `revert-main` branch, but to create new commit that is opposite to the one you want to undo.
+Note that you don't want to change the history of the `revert-main` branch, but to create new \
+commit that is opposite to the one you want to undo.
 
 If the history looks like this:
 
@@ -501,10 +524,12 @@ class ChangeMessage(Task):
 Task: change-message
 ====================
 
-In a branch `change-message-tasks`, there are several commits that make up a complete poem by Emily Dickinson. The very first commit
-of the branch has a wrong commit message saying `Add title and author`. 
+In a branch `change-message-tasks`, there are several commits that make up a complete poem by \
+Emily Dickinson. The very first commit of the branch has a wrong commit message saying \
+`Add title and author`. 
 
-Use interactive rebase to replace the commit message, so that the new message is `Add After Great Pain by Emily Dickinson`.
+Use interactive rebase to replace the commit message, so that the new message is \
+`Add After Great Pain by Emily Dickinson`.
 
 Make sure that the commit history remains unchanged, except for this one commit message.
 
@@ -523,15 +548,15 @@ Make sure that the commit history remains unchanged, except for this one commit 
         main_summaries = [commit.summary for commit in self.iter_commits('change-message-tasks')]
         if len(main_summaries) != len(expected_summaries):
             raise TaskCheckException(
-                'The number of new commits in change-message-main branch differs from the expected number.'
-                'Expected commit number: %s' % (len(expected_summaries))
+                'The number of new commits in change-message-main branch differs from the '
+                'expected number. Expected commit number: %s' % (len(expected_summaries))
             )
 
         # Check that the commit message has been changed.
         if main_summaries[1] != expected_summaries[1]:
             raise TaskCheckException(
-                'The commit message seems not be changed correctly.\n'
-                'Current message: %s\nExpected message: %s' % (main_summaries[1], expected_summaries[1]))
+                'The commit message seems not be changed correctly.\nCurrent message: '
+                '%s\nExpected message: %s' % (main_summaries[1], expected_summaries[1]))
 
         print("OK")
 
@@ -547,12 +572,13 @@ class SquashCommit(Task):
 Task: squash-commits
 ====================
 
-In a branch `squash-commits-tasks`, there are several commits that make up a complete poem by Emily Dickinson. Before we merge the
-content of this branch into `main`, we would like to squash the commits so that the whole added content is only represented by
+In a branch `squash-commits-tasks`, there are several commits that make up a complete poem by \
+Emily Dickinson. Before we merge the content of this branch into `main`, we would like to squash \
+the commits so that the whole added content is only represented by \
 the very first commit. All following commits should be squashed into the first one. 
 
-Use interactive rebase to squash the commits, so that there is only the very first commit left in the branch, while the content
-of the branch remains unchanged.
+Use interactive rebase to squash the commits, so that there is only the very first commit left in \
+the branch, while the content of the branch remains unchanged.
 
 """)
 
@@ -569,17 +595,20 @@ of the branch remains unchanged.
         main_summaries = [commit.summary for commit in self.iter_commits('squash-commits-tasks')]
         if len(main_summaries) != len(expected_summaries):
             raise TaskCheckException(
-                'The number of new commits in squash-commits-tasks branch differs from the expected number.'
-                'Expected commit number: %s' % (len(expected_summaries))
+                'The number of new commits in squash-commits-tasks branch differs from the '
+                'expected number. Expected commit number: %s' % (len(expected_summaries))
             )
 
         if main_summaries[0] != "Add 'Fame is a bee' by Emily Dickinson.":
             raise TaskCheckException(
                 'The message of the first commit has changed, but it should be the same.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[0], main_summaries[0]
+                )
              )
 
-        # Check that there is no difference in content between the original and the squashed repository.
+        # Check that there is no difference in content between the original and the squashed
+        # repository.
         original = [commit for commit in self.iter_commits('origin/squash-commits-tasks')]
         new = [commit for commit in self.iter_commits('squash-commits-tasks')]
 
@@ -603,12 +632,13 @@ class ReorganizeCommits(Task):
 Task: reorganize-commits
 ========================
 
-In a branch `reorganize-commits-tasks`, there are several commits that make up two complete poems by Emily Dickinson. Before we merge the
-content of this branch into `main`, we would like to squash the commits so that the whole added content is only represented by
-two commits, each one for a particular poem.  
+In a branch `reorganize-commits-tasks`, there are several commits that make up two complete poems \
+by Emily Dickinson. Before we merge the content of this branch into `main`, we would like to \
+squash the commits so that the whole added content is only represented by two commits, each one \
+for a particular poem.  
 
-Use interactive rebase to reorganize, squash and reword the commits, so that there are only two commits left in the branch, while the content
-of the branch remains unchanged.
+Use interactive rebase to reorganize, squash and reword the commits, so that there are only two \
+commits left in the branch, while the content of the branch remains unchanged.
 
 The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.`
 
@@ -625,7 +655,9 @@ The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.
             "Poem 1: Add a poem.",
         ]
 
-        main_summaries = [commit.summary for commit in self.iter_commits('reorganize-commits-tasks')]
+        main_summaries = [
+            commit.summary for commit in self.iter_commits('reorganize-commits-tasks')
+        ]
         if len(main_summaries) != len(expected_summaries):
             raise TaskCheckException(
                 'The number of new commits in this branch differs from the expected number.'
@@ -635,16 +667,21 @@ The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.
         if main_summaries[0] != "Poem 2: Add a poem.":
             raise TaskCheckException(
                 'The message of the second commit differs from what is expected.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[0], main_summaries[0]
+                )
              )
 
         if main_summaries[1] != "Poem 1: Add a poem.":
             raise TaskCheckException(
                 'The message of the first commit differs from what is expected.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[1], main_summaries[1])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[1], main_summaries[1]
+                )
              )
 
-        # Check that there is no difference in content between the original and the squashed repository.
+        # Check that there is no difference in content between the original and the squashed
+        # repository.
         original = [commit for commit in self.iter_commits('origin/reorganize-commits-tasks')]
         new = [commit for commit in self.iter_commits('reorganize-commits-tasks')]
 
@@ -669,14 +706,16 @@ class CommitAmend(Task):
 Task: commit-amend
 ==================
 
-In the branch `commit-amend-tasks`, there is one commit that makes up a complete poem by Emily Dickinson. Unfortunately, one of the
-writers made a typo and left this mistake in the name of the author which is `Elimy` but should be `Emily`. Before we merge the
-content of this branch into `main`, we would like to correct the mistake before we do so.   
+In the branch `commit-amend-tasks`, there is one commit that makes up a complete poem by Emily \
+Dickinson. Unfortunately, one of the writers made a typo and left this mistake in the name of \
+the author which is `Elimy` but should be `Emily`. Before we merge the content of this branch \
+into `main`, we would like to correct the mistake before we do so.   
 
-Since this is only a minor change and we have already squashed all the commits in the branch, do not produce an extra commit, but
-add the change to the existing commit instead. 
+Since this is only a minor change and we have already squashed all the commits in the branch, do \
+not produce an extra commit, but add the change to the existing commit instead. 
 
-After the change, there should be one commit only in the branch with the same commit message as before!
+After the change, there should be one commit only in the branch with the same commit message as \
+before!
 
 """)
 
@@ -700,7 +739,9 @@ After the change, there should be one commit only in the branch with the same co
         if main_summaries[0] != "Add poem: Forever is composed of nows":
             raise TaskCheckException(
                 'The message of the commit differs from what is expected.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[0], main_summaries[0]
+                )
              )
 
         # Check that there is a difference in content between the original and the new commit.
@@ -712,7 +753,8 @@ After the change, there should be one commit only in the branch with the same co
 
         if not diff:
             raise TaskCheckException(
-                'The content of the branch seems not to be corrected! The text is the same as it was before.\n')
+                'The content of the branch seems not to be corrected! '
+                'The text is the same as it was before.\n')
         else:
             if "+*By Emily Dickinson*" not in detail:
                 raise TaskCheckException(
@@ -732,11 +774,12 @@ class Stash(Task):
 Task: stash
 ===========
 
-In the branch `stash-tasks`, there is one commit that makes up a skeleton for your own poem. You should change the skeleton file into a text 
-of your liking. Change some lines and save the file.
+In the branch `stash-tasks`, there is one commit that makes up a skeleton for your own poem. You \
+should change the skeleton file into a text of your liking. Change some lines and save the file.
 
-Unfortunately, before you could commit and push the changes, you have learnt that the remote branch has been rebased and you need to
-reset your local branch to the remote branch, but you do not want to lose any changes you have already made in your local branch.
+Unfortunately, before you could commit and push the changes, you have learnt that the remote \
+branch has been rebased and you need to reset your local branch to the remote branch, but you do \
+not want to lose any changes you have already made in your local branch.
 
 Use stash to protect your changes and reset local branch onto the remote one.
 
@@ -755,14 +798,16 @@ Use stash to protect your changes and reset local branch onto the remote one.
         main_summaries = [commit.summary for commit in self.iter_commits('stash-tasks')]
         if len(main_summaries) != len(expected_summaries):
             raise TaskCheckException(
-                'The number of commits in this branch differs from the expected number. Reset the branch.'
-                'Expected commit number: %s' % (len(expected_summaries))
+                'The number of commits in this branch differs from the expected number. Reset the '
+                'branch. Expected commit number: %s' % (len(expected_summaries))
             )
 
         if main_summaries[0] != "Add a poem skeleton.":
             raise TaskCheckException(
                 'The message of the commit differs from what is expected. Reset the branch.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[0], main_summaries[0]
+                )
              )
 
         # Check that there is a difference in content between the original and the new commit.
@@ -792,14 +837,17 @@ class ApplyStash(Task):
 Task: apply-stash
 =================
 
-In the branch `apply-stash-tasks`, there is one commit that makes up a skeleton for your own poem. You should change the skeleton file into a text 
-of your liking. Change some lines and save the file.
+In the branch `apply-stash-tasks`, there is one commit that makes up a skeleton for your own \
+poem. You should change the skeleton file into a text of your liking. Change some lines and save \
+    the file.
 
-Unfortunately, before you could commit and push the changes, you have learnt that the remote branch has been rebased and you need to
-reset your local branch to the remote branch, but you do not want to lose any changes you have already made in your local branch.
+Unfortunately, before you could commit and push the changes, you have learnt that the remote \
+branch has been rebased and you need to reset your local branch to the remote branch, but you do \
+not want to lose any changes you have already made in your local branch.
 
-Use stash to protect your changes and reset local branch onto the remote one. Then apply the stashed content and delete it from the stash.
-Stage the new content and commit it. Make the commit message be 'Add my favourite poem.'
+Use stash to protect your changes and reset local branch onto the remote one. Then apply the \
+stashed content and delete it from the stash. Stage the new content and commit it. Make the \
+commit message be 'Add my favourite poem.'
 
 """)
 
@@ -824,7 +872,9 @@ Stage the new content and commit it. Make the commit message be 'Add my favourit
         if main_summaries[0] != "Add my favourite poem.":
             raise TaskCheckException(
                 'The message of the commit differs from what is expected.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (expected_summaries[0], main_summaries[0])
+                'Expected commit message: %s\nCurrent commit message: %s' % (
+                    expected_summaries[0], main_summaries[0]
+                )
              )
 
         # Check that there is a difference in content between the original and the new commit.
@@ -860,9 +910,11 @@ class ConflictRevert(Task):
 Task: conflict-revert
 =====================
 
-In a branch `conflict-revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
+In a branch `conflict-revert-main`, there is a commit with summary "Make the cheatsheet into a \
+nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
 
-Note that you don't want to change the history of the `conflict-revert-main` branch, but to create new commit that is opposite to the one you want to undo.
+Note that you don't want to change the history of the `conflict-revert-main` branch, but to \
+create new commit that is opposite to the one you want to undo.
 
 In this scenario, you will encounter a conflict and will need to resolve it.
 
@@ -879,7 +931,8 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/conflict-revert-main are present in conflict-revert-main.
+        # Check all commits from the origin/conflict-revert-main are present in
+        # conflict-revert-main.
         self.check_old_commits_unchanged('origin/conflict-revert-main', 'conflict-revert-main')
 
         # Check the commits count
@@ -943,7 +996,8 @@ class NewBranch(Task):
 Task: new-branch
 ================
 
-Find a commit in branch `new-branch-main` with a summary "Add commands for working with remote rpositories".
+Find a commit in branch `new-branch-main` with a summary "Add commands for working with remote \
+rpositories".
 
 Create a new branch named `new-branch` on this commit.
 """)
@@ -992,7 +1046,8 @@ class Drop(Task):
 Task: drop
 ==========
 
-In a branch `drop-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file.
+In a branch `drop-main`, there is a commit with summary "Make the cheatsheet into a nice table" \
+that breaks the markdown in the cheatsheet.md file.
 
 Using an interactive rebase, drop this commit.
 
@@ -1063,7 +1118,9 @@ def main():
     task = task_classes[args.taskname]()
     func = getattr(task, args.command, None)
     if not callable(func):
-        raise TaskException('Command "%s" for task "%s" not found.' % (args.command, args.taskname))
+        raise TaskException(
+            'Command "%s" for task "%s" not found.' % (args.command, args.taskname)
+        )
     func()
 
 
