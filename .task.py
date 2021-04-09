@@ -528,12 +528,7 @@ In a branch `change-message-tasks`, there are several commits that make up a com
 Emily Dickinson. The very first commit of the branch has a wrong commit message saying \
 `Add title and author`. 
 
-<<<<<<< Updated upstream
-Use interactive rebase to replace the commit message, so that the new message is \
-`Add After Great Pain by Emily Dickinson`.
-=======
 Use interactive rebase to replace the commit message, so that the new message is `Add 'After Great Pain' by Emily Dickinson.`
->>>>>>> Stashed changes
 
 Make sure that the commit history remains unchanged, except for this one commit message.
 
