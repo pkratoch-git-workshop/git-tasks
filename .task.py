@@ -83,15 +83,15 @@ Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
 
 If the history looks like this:
 
-                  A---B---C feature
-                 /
-            D---E---F---G main
+                      A---B---C---D---E---F feature
+                     /
+            G---H---I---J main
 
 Then the result should look like this:
 
-                  A---B---C feature
-                 /
-            D---E---F---G---B` main
+                      A---B---C---D---E---F feature
+                     /
+            G---H---I---J---C`--D` main
 
 (To show only task-related branches in gitk: gitk --branches=cherry-pick-*)
 """)
@@ -144,15 +144,15 @@ Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
 
 If the history looks like this:
 
-                  A---B---C feature
+                  A---B---C---D---E---F feature
                  /
-            D---E---F---G main
+            G---H---I---J main
 
 Then the result should look like this:
 
-                  A---B---C feature
+                  A---B---C---D---E---F feature
                  /
-            D---E---F---G---B` main
+            G---H---I---J---C`--D` main
 
 (To show only task-related branches in gitk: gitk --branches=conflict-cherry-pick-*)
 """)
@@ -210,15 +210,15 @@ process).
 
 If the history looks like this:
 
-                  A---B---C feature
-                 /
-            D---E---F---G main
+                      A---B feature
+                     /
+            C---D---E---F main
 
 Then the result should look like this:
 
-                  A---B---C feature
-                 /         \\
-            D---E---F---G---H main
+                      A---B feature
+                     /     \\
+            C---D---E---F---G main
 
 The merge commit can contain a message describing the whole feature that was merged.
 
@@ -272,13 +272,13 @@ Rebase the `rebase-feature` branch on top of the `rebase-main` branch.
 
 If the history looks like this:
 
-                  A---B---C feature
+                  A---B feature
                  /
             D---E---F---G main
 
 Then the result should look like this:
 
-                          A'--B'--C' feature
+                          A'--B' feature
                          /
             D---E---F---G main
 
@@ -336,11 +336,11 @@ index and the working tree, i.e. completely discard all changes introduced by th
 
 If the history looks like this:
 
-            A---B---C---D main
+            A---B---C---D---E---F main
 
 Then the result of resetting to commit B should look like this:
 
-            A---B main
+            A---B---C---D---E main
 
 (To show only task-related branches in gitk: gitk --branches=reset-hard-*)
 """)
@@ -465,11 +465,11 @@ commit that is opposite to the one you want to undo.
 
 If the history looks like this:
 
-            A---B---C---D main
+            A---B---C---D---E---F main
 
 Then the result should look like this:
 
-            A---B---C---D---B' main
+            A---B---C---D---E---F---D' main
 
 (To show only task-related branches in gitk: gitk --branches=revert-*)
 """)
@@ -919,11 +919,11 @@ In this scenario, you will encounter a conflict and will need to resolve it.
 
 If the history looks like this:
 
-            A---B---C---D main
+            A---B---C---D---E---F---G main
 
 Then the result should look like this:
 
-            A---B---C---D---B' main
+            A---B---C---D---E---F---D' main
 
 (To show only task-related branches in gitk: gitk --branches=conflict-revert-*)
 """)
@@ -1052,11 +1052,11 @@ Using an interactive rebase, drop this commit.
 
 If the history looks like this:
 
-            A---B---C---D main
+            A---B---C---D---E---F main
 
 Then the result should look like this:
 
-            A---B---D main
+            A---B---C---E---F main
 
 (To show only task-related branches in gitk: gitk --branches=drop-*)
 """)
