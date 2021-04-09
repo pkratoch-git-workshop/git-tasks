@@ -850,20 +850,22 @@ Stage the new content and commit it. Make the commit message be 'Add my favourit
                 'See stash:\n%s' % stash)
 
         print("OK")
-class RevertConflict(Task):
-    branch_names = ['revert-conflict-main']
+
+
+class ConflictRevert(Task):
+    branch_names = ['conflict-revert-main']
 
     def start(self):
         self.reset_branches()
 
         print("""
 =====================
-Task: revert-conflict
+Task: conflict-revert
 =====================
 
-In a branch `revert-conflict-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
+In a branch `conflict-revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
 
-Note that you don't want to change the history of the `revert-conflict-main` branch, but to create new commit that is opposite to the one you want to undo.
+Note that you don't want to change the history of the `conflict-revert-main` branch, but to create new commit that is opposite to the one you want to undo.
 
 In this scenario, you will encounter a conflict and will need to resolve it.
 
@@ -875,16 +877,16 @@ Then the result should look like this:
 
             A---B---C---D---B' main
 
-(To show only task-related branches in gitk: gitk --branches=revert-conflict-*)
+(To show only task-related branches in gitk: gitk --branches=conflict-revert-*)
 """)
 
 
     def check(self):
-        # Check all commits from the origin/revert-conflict-main are present in revert-conflict-main.
-        self.check_old_commits_unchanged('origin/revert-conflict-main', 'revert-conflict-main')
+        # Check all commits from the origin/conflict-revert-main are present in conflict-revert-main.
+        self.check_old_commits_unchanged('origin/conflict-revert-main', 'conflict-revert-main')
 
         # Check the commits count
-        self.check_commits_count('revert-conflict-main', 8)
+        self.check_commits_count('conflict-revert-main', 8)
 
         # Check the commit order
         expected_summaries = [
@@ -898,10 +900,10 @@ Then the result should look like this:
             'Add cheatsheet with basic git commands',
         ]
 
-        main_summaries = [commit.summary for commit in self.iter_commits('revert-conflict-main')]
+        main_summaries = [commit.summary for commit in self.iter_commits('conflict-revert-main')]
         if main_summaries[1:] != expected_summaries[1:]:
             raise TaskCheckException(
-                'Unexpected commits in revert-conflict-main branch. '
+                'Unexpected commits in conflict-revert-main branch. '
                 'Expected summaries:\n%s' % '\n'.join(expected_summaries)
             )
 
@@ -921,7 +923,7 @@ Then the result should look like this:
             '- git log     - show commit logs',
             '- git show    - show various types of objects',
         ]
-        self.repo.git.checkout('revert-conflict-main')
+        self.repo.git.checkout('conflict-revert-main')
         with open('source/cheatsheet.md') as f:
             lines = [line.strip() for line in f if line.strip()]
         if lines != expected_lines:
@@ -1042,6 +1044,7 @@ def main():
         'reset-hard': ResetHard,
         'reset-soft': ResetSoft,
         'revert': Revert,
+        'conflict-revert': ConflictRevert,
         'change-message': ChangeMessage,
         'squash-commits': SquashCommit,
         'reorganize-commits': ReorganizeCommits,
