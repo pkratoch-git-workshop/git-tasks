@@ -1135,7 +1135,7 @@ def main():
     args = parser.parse_args()
 
     if args.taskname not in task_classes:
-        TaskException('Task "%s" not found.')
+        raise TaskException('Task "%s" not found.' % args.taskname)
 
     task = task_classes[args.taskname]()
     func = getattr(task, args.command, None)
