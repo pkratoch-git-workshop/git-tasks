@@ -1085,6 +1085,28 @@ Then the result should look like this:
         print("OK")
 
 
+class Blame(Task):
+    branch_names = ['blame-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+===========
+Task: blame
+===========
+
+In a branch `blame-main`, who last changed the line 78 in the file `source/cheatsheet.md`?
+
+Who originally introduced the typo in the word "download"?
+
+(To show only task-related branches in gitk: gitk --branches=blame-*)
+""")
+
+    def check(self):
+        print("Nothing to check.")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1104,6 +1126,7 @@ def main():
         'apply-stash': ApplyStash,
         'new-branch': NewBranch,
         'drop': Drop,
+        'blame': Blame,
     }
 
     parser = argparse.ArgumentParser()
