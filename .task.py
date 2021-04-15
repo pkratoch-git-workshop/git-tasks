@@ -138,9 +138,9 @@ class ConflictCherryPick(Task):
 Task: conflict-cherry-pick
 ==========================
 
-Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
-`source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the \
-`cherry-pick-main` branch.
+Cherry-pick into the `conflict-cherry-pick-main` branch all the commits that modified \
+`source/cheatsheet.md` file in the `conflict-cherry-pick-feature` branch that are not yet in the \
+`conflict-cherry-pick-main` branch.
 
 If the history looks like this:
 
