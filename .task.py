@@ -1107,6 +1107,52 @@ Who originally introduced the typo in the word "download"?
         print("Nothing to check.")
 
 
+class Add(Task):
+    branch_names = ['add-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=========
+Task: add
+=========
+
+Switch to a branch named "add-main".
+
+Then create two new files named "day" and "night" and add the "day" file to the index.
+""")
+
+    def check(self):
+        # Check the commits count
+        self.check_commits_count('add-main', 0)
+
+        # Check that there is a stash saved.
+        direct = self.repo.git
+        stash = direct.stash('list')
+
+        if stash:
+            raise TaskCheckException(
+                'There is something in the stash, but the stash should be empty.\n\n'
+                'See stash:\n%s' % stash)
+
+        # Check index
+        staged = [item.a_path for item in self.repo.index.diff('HEAD')]
+        if len(staged) != 1 or 'day' not in staged:
+            raise TaskCheckException(
+                'There are different paths in index that expected. It should contain only '
+                'the "day" file. List of staged files: %s' % ', '.join(staged))
+
+        # Check untracked files
+        untracked = self.repo.untracked_files
+        if 'night' not in untracked:
+            raise TaskCheckException(
+                'The "night" file should be untracked, but is not. List of untracked '
+                'files: %s' % ', '.join(untracked))
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1127,6 +1173,7 @@ def main():
         'new-branch': NewBranch,
         'drop': Drop,
         'blame': Blame,
+        'add': Add,
     }
 
     parser = argparse.ArgumentParser()
