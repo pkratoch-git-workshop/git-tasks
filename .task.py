@@ -22,6 +22,7 @@ class Task():
 
     def reset_branches(self):
         """Delete all branches for this task and checkout them again from origin."""
+        self.repo.git.reset('--mixed')
         self.repo.git.checkout('main')
         for branch_name in self.branch_names:
             try:
