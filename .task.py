@@ -1148,6 +1148,47 @@ Then create two new files named "day" and "night" and add the "day" file to the 
         print("OK")
 
 
+class Commit(Task):
+    branch_names = ['simple']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+============
+Task: commit
+============
+
+Switch to a branch named `simple`.
+
+Then create a new file named "new-file" and commit it.
+""")
+
+    def check(self):
+        # Check the commits count
+        self.check_commits_count('simple', 12)
+
+        # Check all commits from the origin/simple branch are present.
+        self.check_old_commits_unchanged('origin/simple', 'simple')
+
+        # Check the last commit contains only the one changed file
+        commit = next(self.iter_commits('simple'))
+        changed_files = commit.stats.files.keys()
+        if not changed_files:
+            raise TaskCheckException(
+                'The "new-file" file is not in the commit. '
+                'There are no files changed by the commit.')
+        if 'new-file' not in changed_files:
+            raise TaskCheckException(
+                'The "new-file" file is not in the commit. List of files changed by the '
+                'commit: %s' % ', '.join(changed_files))
+        if len(changed_files) > 1:
+            raise TaskCheckException(
+                'There are too many files changed by the commit: %s' % ', '.join(changed_files))
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1169,6 +1210,7 @@ def main():
         'drop': Drop,
         'blame': Blame,
         'add': Add,
+        'commit': Commit,
     }
 
     parser = argparse.ArgumentParser()
