@@ -1,6 +1,6 @@
 Git Cheatsheet
 ==============
 
-- git add
-- git commit
+- git add     - add file contents to the index
+- git commit  - record changes to the repository
 
