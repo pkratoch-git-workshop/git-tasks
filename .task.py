@@ -1128,15 +1128,6 @@ Then create two new files named "day" and "night" and add the "day" file to the 
         # Check the commits count
         self.check_commits_count('add-main', 0)
 
-        # Check that there is a stash saved.
-        direct = self.repo.git
-        stash = direct.stash('list')
-
-        if stash:
-            raise TaskCheckException(
-                'There is something in the stash, but the stash should be empty.\n\n'
-                'See stash:\n%s' % stash)
-
         # Check index
         staged = [item.a_path for item in self.repo.index.diff('HEAD')]
         if len(staged) != 1 or 'day' not in staged:
