@@ -11,3 +11,5 @@ Git Cheatsheet
 - git push    - update remote refs along with associated objects
 - git fetch   - download objects and refs from another repository
 
+- git branch  - list, create, or delete branches
+
