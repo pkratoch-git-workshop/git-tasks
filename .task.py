@@ -1109,7 +1109,7 @@ Who originally introduced the typo in the word "download"?
 
 
 class Add(Task):
-    branch_names = ['add-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -1119,14 +1119,17 @@ class Add(Task):
 Task: add
 =========
 
-Switch to a branch named "add-main".
+Switch to a branch named `simple`.
 
 Then create two new files named "day" and "night" and add the "day" file to the index.
 """)
 
     def check(self):
         # Check the commits count
-        self.check_commits_count('add-main', 0)
+        self.check_commits_count('simple', 11)
+
+        # Check all commits from the origin/simple branch are present.
+        self.check_old_commits_unchanged('origin/simple', 'simple')
 
         # Check index
         staged = [item.a_path for item in self.repo.index.diff('HEAD')]
