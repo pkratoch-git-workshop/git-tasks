@@ -1258,6 +1258,27 @@ What is the difference between `diff-one` and `diff-two` branches?
         print("Nothing to check.")
 
 
+class DeleteBranch(Task):
+    branch_names = ['delete-branch-main']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+===================
+Task: delete-branch
+===================
+
+Delete branch named `delete-branch-main`.
+""")
+
+    def check(self):
+        if 'delete-branch-main' in [branch.name for branch in self.repo.branches]:
+            raise TaskCheckException('The branch `delete-branch-main` still exists.')
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1283,6 +1304,7 @@ def main():
         'switch': Switch,
         'log': Log,
         'diff': Diff,
+        'delete-branch': DeleteBranch,
     }
 
     parser = argparse.ArgumentParser()
