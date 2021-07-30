@@ -1189,6 +1189,35 @@ Then create a new file named "new-file" and commit it.
         print("OK")
 
 
+class Switch(Task):
+    branch_names = ['simple']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+============
+Task: switch
+============
+
+Switch to a branch named "simple".
+""")
+
+    def check(self):
+        # Check current branch is "simple"
+        if self.repo.active_branch.name != 'simple':
+            raise TaskCheckException(
+                'Current branch is not "simple", but "%s".' % self.repo.active_branch.name)
+        
+        # Check the commits count
+        self.check_commits_count('simple', 11)
+
+        # Check all commits from the origin/simple branch are present.
+        self.check_old_commits_unchanged('origin/simple', 'simple')
+
+        print("OK")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1211,6 +1240,7 @@ def main():
         'blame': Blame,
         'add': Add,
         'commit': Commit,
+        'switch': Switch,
     }
 
     parser = argparse.ArgumentParser()
