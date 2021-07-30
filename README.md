@@ -25,6 +25,9 @@ To see only task-related branches in gitk: `gitk --branches=<taskname>-*`
 ## List of tasks
 
 1. switch
+1. add
+1. commit
+1. new-branch
 1. merge
 1. rebase
 1. blame
@@ -32,7 +35,6 @@ To see only task-related branches in gitk: `gitk --branches=<taskname>-*`
 1. apply-stash
 1. cherry-pick
 1. conflict-cherry-pick
-1. new-branch
 1. commit-amend
 1. reset-hard
 1. reset-soft
