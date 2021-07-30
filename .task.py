@@ -1240,6 +1240,24 @@ What is the second changed line in the last but one commit?
         print("Nothing to check.")
 
 
+class Diff(Task):
+    branch_names = ['diff-one', 'diff-two']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+==========
+Task: diff
+==========
+
+What is the difference between `diff-one` and `diff-two` branches?
+""")
+
+    def check(self):
+        print("Nothing to check.")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1264,6 +1282,7 @@ def main():
         'commit': Commit,
         'switch': Switch,
         'log': Log,
+        'diff': Diff,
     }
 
     parser = argparse.ArgumentParser()
