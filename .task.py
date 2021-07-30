@@ -1218,6 +1218,28 @@ Switch to a branch named "simple".
         print("OK")
 
 
+class Log(Task):
+    branch_names = ['simple']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=========
+Task: log
+=========
+
+In a branch `simple`, who made the last but one commit?
+
+What is the summary of the last but one commit?
+
+What is the second changed line in the last but one commit?
+""")
+
+    def check(self):
+        print("Nothing to check.")
+
+
 def main():
     # Define tasks:
     task_classes = {
@@ -1241,6 +1263,7 @@ def main():
         'add': Add,
         'commit': Commit,
         'switch': Switch,
+        'log': Log,
     }
 
     parser = argparse.ArgumentParser()
