@@ -321,6 +321,94 @@ Then the result should look like this:
         print("OK")
 
 
+class ConflictRebase(Task):
+    branch_names = ['conflict-rebase-main', 'conflict-rebase-feature']
+
+    def start(self):
+        self.reset_branches()
+
+        print("""
+=====================
+Task: conflict-rebase
+=====================
+
+Rebase the `conflict-rebase-feature` branch on top of the `conflict-rebase-main` branch. 
+
+In this scenario, you will encounter a conflict and will need to resolve it.
+
+If the history looks like this:
+
+                  A---B feature
+                 /
+            D---E---F---G main
+
+Then the result should look like this:
+
+                          A'--B' feature
+                         /
+            D---E---F---G main
+
+(To show only task-related branches in gitk: gitk --branches=conflict-rebase-*)
+""")
+
+
+    def check(self):
+        # Check all commits from the origin/conflict-rebase-main are present in both
+        # conflict-rebase-main and conflict-rebase-feature.
+        self.check_old_commits_unchanged('origin/conflict-rebase-main', 'conflict-rebase-main')
+        self.check_old_commits_unchanged('origin/conflict-rebase-main', 'conflict-rebase-feature')
+
+        # Check the commits count
+        self.check_commits_count('conflict-rebase-main', 4)
+        self.check_commits_count('conflict-rebase-feature', 5)
+
+        # Check the commit order
+        expected_summaries = [
+            'Add commands for working with branches',
+            'Add commands for working with remote rpositories',
+            'Add explanations to individual commands',
+            'Add commands for inspecting the repo',
+            'Add cheatsheet with basic git commands',
+        ]
+
+        main_summaries = [commit.summary for commit in self.iter_commits('conflict-rebase-main')]
+        if main_summaries != expected_summaries[1:]:
+            raise TaskCheckException('The commits in conflict-rebase-main branch changed.')
+
+        feature_summaries = [
+            commit.summary for commit in self.iter_commits('conflict-rebase-feature')]
+        if feature_summaries != expected_summaries:
+            raise TaskCheckException(
+                'Unexpected commits in conflict-rebase-feature branch. '
+                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+            )
+
+        # Check the source/cheatsheet.md file is correct
+        expected_lines = [
+            "Git Cheatsheet",
+            "==============",
+            "git add     - add file contents to the index",
+            "git commit  - record changes to the repository",
+            "git status  - show the working tree status",
+            "git log     - show commit logs",
+            "git show    - show various types of objects",
+            "git branch - list, create, or delete branches",
+            "git switch - switch branches",
+            "git push    - update remote refs along with associated objects",
+            "git fetch   - download objects and refs from another repository",
+        ]
+        self.repo.git.checkout('conflict-rebase-feature')
+        with open('source/cheatsheet.md') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        if lines != expected_lines:
+            raise TaskCheckException(
+                'The content of source/cheatsheet.md is different than expected. '
+                'Expected lines (without empty lines):\n%s' % '\n'.join(expected_lines)
+            )
+
+        print("OK")
+
+
 class ResetHard(Task):
     branch_names = ['reset-hard-main']
 
@@ -1286,6 +1374,7 @@ def main():
         'conflict-cherry-pick': ConflictCherryPick,
         'merge': Merge,
         'rebase': Rebase,
+        'conflict-rebase': ConflictRebase,
         'reset-hard': ResetHard,
         'reset-soft': ResetSoft,
         'revert': Revert,

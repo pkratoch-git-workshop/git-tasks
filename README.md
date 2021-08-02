@@ -33,6 +33,7 @@ To see only task-related branches in gitk: `gitk --branches=<taskname>-*`
 1. delete-branch
 1. merge
 1. rebase
+1. conflict-rebase
 1. blame
 1. stash
 1. apply-stash
