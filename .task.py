@@ -837,13 +837,12 @@ before!
         new = [commit for commit in self.iter_commits('commit-amend-tasks')]
 
         diff = original[0].diff(new[0], create_patch=True)
-        detail = str(diff[0].diff)
-
         if not diff:
             raise TaskCheckException(
                 'The content of the branch seems not to be corrected! '
                 'The text is the same as it was before.\n')
         else:
+            detail = str(diff[0].diff)
             if "+*By Emily Dickinson*" not in detail:
                 raise TaskCheckException(
                     'The mistake was not corrected as expected.\n\n'
