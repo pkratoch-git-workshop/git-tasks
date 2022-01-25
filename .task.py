@@ -1361,7 +1361,16 @@ What is the second changed line in the last but one commit?
 """)
 
     def check(self):
-        print("Nothing to check.")
+        answer = input("In a branch `simple`, who made the last but one commit? ")
+        if answer.strip() != "Alice":
+            raise TaskCheckException('This is not the correct answer.')
+        answer = input("In a branch `simple`, what is the summary of the last but one commit? ")
+        if answer.strip() != "Add pictures to explain merge and rebase":
+            raise TaskCheckException('This is not the correct answer.')
+        answer = input("In a branch `simple`, what is the second changed line in the last but one commit? ")
+        if answer.strip() != "- Before merge:":
+            raise TaskCheckException('This is not the correct answer.')
+        print("OK")
 
 
 class Diff(Task):
