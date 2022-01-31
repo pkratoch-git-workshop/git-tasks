@@ -410,11 +410,13 @@ Then the result should look like this:
             )
 
         # Check the source/cheatsheet.md file is correct
-        expected_lines = [
+        expected_start = [
             "Git Cheatsheet",
             "==============",
             "git add     - add file contents to the index",
             "git commit  - record changes to the repository",
+        ]
+        expected_lines = [
             "git status  - show the working tree status",
             "git log     - show commit logs",
             "git show    - show various types of objects",
@@ -423,13 +425,33 @@ Then the result should look like this:
             "git push    - update remote refs along with associated objects",
             "git fetch   - download objects and refs from another repository",
         ]
-        switch_branch('conflict-rebase-feature')
+        if current_branch() != 'conflict-rebase-feature':
+            switch_branch('conflict-rebase-feature')
         with open('source/cheatsheet.md') as f:
             lines = [line.strip() for line in f if line.strip()]
-        if lines != expected_lines:
+        if lines[:4] != expected_start:
             raise TaskCheckException(
                 'The content of source/cheatsheet.md is different than expected. '
-                'Expected lines (without empty lines):\n%s' % '\n'.join(expected_lines)
+                'It should start with (without empty lines):\n%s' % '\n'.join(expected_start)
+            )
+        if sorted(lines[4:]) != sorted(expected_lines):
+            raise TaskCheckException(
+                'The content of source/cheatsheet.md is different than expected. Expected '
+                'lines (without empty lines):\n%s' % '\n'.join(expected_start + expected_lines)
+            )
+
+        # Check the last commit adds only commands for working with branches 
+        expected_added_commands = [
+            "+git branch - list, create, or delete branches",
+            "+git switch - switch branches",
+        ]
+        diff_last_commit = git_diff('conflict-rebase-feature^', 'conflict-rebase-feature').split('\n')
+        added_commands = [line for line in diff_last_commit if line.startswith("+git")]
+        removed_commands = [line for line in diff_last_commit if line.startswith("-git")]
+        if removed_commands or sorted(added_commands) != expected_added_commands:
+            raise TaskCheckException(
+                'The last commit should only add commands for working with branches. '
+                'Expected added commands:\n%s' % '\n'.join(expected_added_commands)
             )
 
         print("OK")
