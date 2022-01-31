@@ -1388,7 +1388,13 @@ What is the difference between `diff-one` and `diff-two` branches?
 """)
 
     def check(self):
-        print("Nothing to check.")
+        answer = input("Which branch contains additional line? ")
+        if answer.strip() != "diff-one":
+            raise TaskCheckException('This is not the correct answer.')
+        answer = input("What is the added line? ")
+        if answer.strip() != "- git log     - show commit logs":
+            raise TaskCheckException('This is not the correct answer.')
+        print("OK")
 
 
 class DeleteBranch(Task):
