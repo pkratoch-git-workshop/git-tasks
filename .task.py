@@ -1235,7 +1235,16 @@ Who originally introduced the typo in the word "download"?
 """)
 
     def check(self):
-        print("Nothing to check.")
+        answer = input(
+            "In a branch `blame-main`, who last changed the line 78 in the file "
+            "`source/cheatsheet.md`? "
+        )
+        if answer.strip() != "Dave":
+            raise TaskCheckException('This is not the correct answer.')
+        answer = input('Who originally introduced the typo in the word "download"? ')
+        if answer.strip() != "Chloe":
+            raise TaskCheckException('This is not the correct answer.')
+        print("OK")
 
 
 class Add(Task):
