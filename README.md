@@ -4,7 +4,6 @@
 
 ### Prerequisites
 
-1. Enter the `sudo dnf install python3-GitPython` command to install necessary dependencies.
 1. Before starting the first task, run `init-tasks` to make the `task.py` script available.
 
 ## Working with tasks
