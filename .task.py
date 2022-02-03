@@ -32,7 +32,7 @@ def current_branch():
 
 def switch_branch(branch):
     """Switch current branch."""
-    subprocess.run(['git', 'switch', branch], check=True)
+    subprocess.run(['git', 'checkout', branch], check=True)
 
 
 def commit_log(branch_name, pretty_format=FORMAT_HASH):
