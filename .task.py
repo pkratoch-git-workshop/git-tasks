@@ -20,13 +20,13 @@ class TaskCheckException(TaskException):
 
 def branch_list():
     """Get list of branches."""
-    result = subprocess.run(['git', 'branch'], capture_output=True, check=True)
+    result = subprocess.run(['git', 'branch'], stdout=subprocess.PIPE, check=True)
     return [branch.strip() for branch in result.stdout.decode("utf-8").strip().split('\n')]
 
 
 def current_branch():
     """Get name of the current branch."""
-    result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, check=True)
+    result = subprocess.run(['git', 'branch', '--show-current'], stdout=subprocess.PIPE, check=True)
     return result.stdout.decode("utf-8").strip()
 
 
@@ -39,7 +39,7 @@ def commit_log(branch_name, pretty_format=FORMAT_HASH):
     """Get commit log of commits in given branch (on top of the tasks branch)."""
     result = subprocess.run(
         ['git', 'log', '--pretty=' + pretty_format, 'origin/tasks..' + branch_name],
-        capture_output=True,
+        stdout=subprocess.PIPE,
         check=True
     )
     return result.stdout.decode("utf-8").strip().split('\n')
@@ -48,7 +48,7 @@ def commit_log(branch_name, pretty_format=FORMAT_HASH):
 def commit_show(commit, pretty_format=FORMAT_HASH):
     """Get commit information in particular format."""
     result = subprocess.run(
-        ['git', 'show', '--pretty=' + pretty_format, '-s', commit], capture_output=True, check=True
+        ['git', 'show', '--pretty=' + pretty_format, '-s', commit], stdout=subprocess.PIPE, check=True
     )
     return result.stdout.decode("utf-8").strip()
 
@@ -81,7 +81,7 @@ def check_commits_count(branch, expected_commits_count):
 
 
 def git_diff(*args):
-    result = subprocess.run(['git', 'diff', *args], capture_output=True, check=True)
+    result = subprocess.run(['git', 'diff', *args], stdout=subprocess.PIPE, check=True)
     return result.stdout.decode("utf-8").strip()
 
 
@@ -948,7 +948,7 @@ Use stash to protect your changes and reset local branch onto the remote one.
                 'See the diff: \n%s' % diff)
 
         # Check that there is a stash saved.
-        result = subprocess.run(['git', 'stash', 'list'], capture_output=True, check=True)
+        result = subprocess.run(['git', 'stash', 'list'], stdout=subprocess.PIPE, check=True)
         stash_list = result.stdout.decode("utf-8").strip()
         if not stash_list:
             raise TaskCheckException(
@@ -1018,7 +1018,7 @@ commit message be 'Add my favourite poem.'
                 'The content of the branch seems not to be correctly applied from stash!')
 
         # Check that there is a stash saved.
-        result = subprocess.run(['git', 'stash', 'list'], capture_output=True, check=True)
+        result = subprocess.run(['git', 'stash', 'list'], stdout=subprocess.PIPE, check=True)
         stash_list = result.stdout.decode("utf-8").strip()
 
         if stash_list:
@@ -1268,7 +1268,7 @@ Create two new files named "day" and "night" and add the "day" file to the index
         # Check all commits from the origin/simple branch are present.
         check_old_commits_unchanged('origin/simple', 'simple')
 
-        result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, check=True)
+        result = subprocess.run(['git', 'status', '--porcelain'], stdout=subprocess.PIPE, check=True)
         status = result.stdout.decode("utf-8").strip()
         added_files = []
         untracked_files = []
@@ -1326,7 +1326,7 @@ Then create a new file named "new-file" and commit it.
 
         # Check the last commit contains only the one changed file
         result = subprocess.run(
-            ['git', 'show', '--pretty=format:', '--name-only'], capture_output=True, check=True
+            ['git', 'show', '--pretty=format:', '--name-only'], stdout=subprocess.PIPE, check=True
         )
         changed_files = result.stdout.decode("utf-8").strip().split('\n')
         if not changed_files:
