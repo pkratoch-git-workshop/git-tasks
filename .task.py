@@ -996,7 +996,7 @@ If the history looks like this:
 
 Then the result should look like this:
 
-            A---B---C---D---E---F---D' main
+            A---B---C---D---E---F---G---D' main
 
 (To show only task-related branches in gitk: gitk --branches=conflict-revert-*)
 """)
