@@ -53,6 +53,12 @@ def commit_show(commit, pretty_format=FORMAT_HASH):
     return result.stdout.decode("utf-8").strip()
 
 
+def check_branches_identical(old_branch, new_branch):
+    """Check all the commits in the two branches are the same."""
+    if commit_log(old_branch) != commit_log(new_branch):
+        raise TaskCheckException('The `%s` branch changed.' % new_branch)
+
+
 def check_old_commits_unchanged(old_branch, new_branch):
     """Check all the commits in old branch are unchanged in the new branch
     (have the same hexsha)."""
@@ -78,6 +84,14 @@ def check_commits_count(branch, expected_commits_count):
         raise TaskCheckException(msg.format(branch=branch, diff=diff, quantifier='more'))
     if commits_count < expected_commits_count:
         raise TaskCheckException(msg.format(branch=branch, diff=diff, quantifier='less'))
+
+
+def check_summaries(branch, expected, skip=0):
+    actual = commit_log(branch, FORMAT_SUMMARY)
+    if actual[skip:] != expected[skip:]:
+        raise TaskCheckException(
+            'Unexpected commits in the `%s` branch. Expected summaries: \n%s' % (branch, '\n'.join(expected))
+        )
 
 
 def git_diff(*args):
@@ -132,13 +146,13 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/cherry-pick-main and origin/cherry-pick-feature
-        # branches are present.
+        # Check the cherry-pick-feature branch hasn't changed.
+        check_branches_identical('origin/cherry-pick-feature', 'cherry-pick-feature')
+
+        # Check all commits from the origin/cherry-pick-main are present in the cherry-pick-main.
         check_old_commits_unchanged('origin/cherry-pick-main', 'cherry-pick-main')
-        check_old_commits_unchanged('origin/cherry-pick-feature', 'cherry-pick-feature')
 
         # Check the commits count
-        check_commits_count('cherry-pick-feature', 9)
         check_commits_count('cherry-pick-main', 6)
 
         # Check the commit order
@@ -150,13 +164,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('cherry-pick-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in cherry-pick-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('cherry-pick-main', expected_summaries)
 
         print("OK")
 
@@ -193,17 +201,13 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/conflict-cherry-pick-main and
-        # origin/conflict-cherry-pick-feature branches are present.
-        check_old_commits_unchanged(
-            'origin/conflict-cherry-pick-main', 'conflict-cherry-pick-main'
-        )
-        check_old_commits_unchanged(
-            'origin/conflict-cherry-pick-feature', 'conflict-cherry-pick-feature'
-        )
+        # Check the conflict-cherry-pick-feature branch hasn't changed.
+        check_branches_identical('origin/conflict-cherry-pick-feature', 'conflict-cherry-pick-feature')
+
+        # Check all commits from the origin/conflict-cherry-pick-main are present in the conflict-cherry-pick-main.
+        check_old_commits_unchanged('origin/conflict-cherry-pick-main', 'conflict-cherry-pick-main')
 
         # Check the commits count
-        check_commits_count('conflict-cherry-pick-feature', 8)
         check_commits_count('conflict-cherry-pick-main', 6)
 
         # Check the commit order
@@ -215,13 +219,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('conflict-cherry-pick-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in conflict-cherry-pick-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('conflict-cherry-pick-main', expected_summaries)
 
         print("OK")
 
@@ -259,6 +257,9 @@ The merge commit can contain a message describing the whole feature that was mer
 
 
     def check(self):
+        # Check the merge-feature branch hasn't changed.
+        check_branches_identical('origin/merge-feature', 'merge-feature')
+
         # Check all commits from the origin/merge-main and origin/merge-feature branches are
         # present in merge-main.
         check_old_commits_unchanged('origin/merge-main', 'merge-main')
@@ -315,13 +316,13 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/rebase-main are present in both rebase-main and
-        # rebase-feature.
-        check_old_commits_unchanged('origin/rebase-main', 'rebase-main')
+        # Check the rebase-main branch hasn't changed.
+        check_branches_identical('origin/rebase-main', 'rebase-main')
+
+        # Check all commits from the origin/rebase-main are present in the rebase-feature.
         check_old_commits_unchanged('origin/rebase-main', 'rebase-feature')
 
         # Check the commits count
-        check_commits_count('rebase-main', 4)
         check_commits_count('rebase-feature', 6)
 
         # Check the commit order
@@ -333,17 +334,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('rebase-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries[2:]:
-            raise TaskCheckException('The commits in rebase-main branch changed.')
-
-        feature_summaries = commit_log('rebase-feature', FORMAT_SUMMARY)
-        if feature_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in rebase-feature branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('rebase-feature', expected_summaries)
 
         print("OK")
 
@@ -380,13 +371,13 @@ Then the result should look like this:
 
 
     def check(self):
-        # Check all commits from the origin/conflict-rebase-main are present in both
-        # conflict-rebase-main and conflict-rebase-feature.
-        check_old_commits_unchanged('origin/conflict-rebase-main', 'conflict-rebase-main')
+        # Check the conflict-rebase-main branch hasn't changed.
+        check_branches_identical('origin/conflict-rebase-main', 'conflict-rebase-main')
+
+        # Check all commits from the origin/conflict-rebase-main are present in the conflict-rebase-feature.
         check_old_commits_unchanged('origin/conflict-rebase-main', 'conflict-rebase-feature')
 
         # Check the commits count
-        check_commits_count('conflict-rebase-main', 4)
         check_commits_count('conflict-rebase-feature', 5)
 
         # Check the commit order
@@ -397,17 +388,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('conflict-rebase-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries[1:]:
-            raise TaskCheckException('The commits in conflict-rebase-main branch changed.')
-
-        feature_summaries = commit_log('conflict-rebase-feature', FORMAT_SUMMARY)
-        if feature_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in conflict-rebase-feature branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('conflict-rebase-feature', expected_summaries)
 
         # Check the source/cheatsheet.md file is correct
         expected_start = [
@@ -511,13 +492,7 @@ Then the result of resetting to commit B should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('reset-hard-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in reset-hard-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('reset-hard-main', expected_summaries)
 
         print("OK")
 
@@ -568,13 +543,7 @@ and the working tree.
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('reset-soft-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in reset-soft-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('reset-soft-main', expected_summaries)
 
         diff_staged = git_diff('--staged')
         diff_resetted_commit = git_diff('origin/reset-soft-main^', 'origin/reset-soft-main')
@@ -630,13 +599,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('revert-main', FORMAT_SUMMARY)
-        if main_summaries[1:] != expected_summaries[1:]:
-            raise TaskCheckException(
-                'Unexpected commits in revert-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('revert-main', expected_summaries, skip=1)
 
         # Check the last commit is the correct reverted commit by comparing diffs
         commits = commit_log('revert-main')
@@ -914,29 +877,8 @@ Use stash to protect your changes and reset local branch onto the remote one.
 """)
 
     def check(self):
-
-        # Check the commits count
-        check_commits_count('stash-tasks', 1)
-
-        # Check the commit order.
-        expected_summaries = [
-            "Add a poem skeleton.",
-        ]
-
-        main_summaries = commit_log('stash-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of commits in this branch differs from the expected number. Reset the '
-                'branch. Expected commit number: %s' % (len(expected_summaries))
-            )
-
-        if main_summaries[0] != "Add a poem skeleton.":
-            raise TaskCheckException(
-                'The message of the commit differs from what is expected. Reset the branch.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (
-                    expected_summaries[0], main_summaries[0]
-                )
-             )
+        # Check the apply-stash-tasks branch hasn't changed.
+        check_branches_identical('origin/stash-tasks', 'stash-tasks')
 
         # Check that there is a difference in content between the original and the new commit.
         original = commit_show('origin/stash-tasks')
@@ -1079,13 +1021,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('conflict-revert-main', FORMAT_SUMMARY)
-        if main_summaries[1:] != expected_summaries[1:]:
-            raise TaskCheckException(
-                'Unexpected commits in conflict-revert-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('conflict-revert-main', expected_summaries, skip=1)
 
         # Check the last commit is the correct reverted commit
         expected_lines = [
@@ -1131,22 +1067,18 @@ Create a new branch named `new-branch` starting of the `new-branch-main` branch.
 
 
     def check(self):
+        # Check the new-branch-main branch hasn't changed.
+        check_branches_identical('origin/new-branch-main', 'new-branch-main')
+
         # Check branch exists.
         if 'new-branch' not in branch_list() and '* new-branch' not in branch_list():
             raise TaskCheckException('Branch "new-branch" does not exist.')
 
-        # Check new-branch-main hasn't changed.
-        check_old_commits_unchanged('origin/new-branch-main', 'new-branch-main')
-        check_commits_count('new-branch-main', 6)
-
         # Check new-branch is the same as new-branch-main.
         try:
-            check_old_commits_unchanged('new-branch-main', 'new-branch')
-        except TaskCheckException as e:
-            raise TaskCheckException(
-                'The new branch is not on the top of the `new-branch-main` branch: %s' % e
-            )
-        check_commits_count('new-branch', 6)
+            check_branches_identical('new-branch-main', 'new-branch')
+        except TaskCheckException:
+            raise TaskCheckException('The new branch is not on the top of the `new-branch-main` branch.')
 
         print("OK")
 
@@ -1191,13 +1123,7 @@ Then the result should look like this:
             'Add commands for inspecting the repo',
             'Add cheatsheet with basic git commands',
         ]
-
-        main_summaries = commit_log('drop-main', FORMAT_SUMMARY)
-        if main_summaries != expected_summaries:
-            raise TaskCheckException(
-                'Unexpected commits in drop-main branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
-            )
+        check_summaries('drop-main', expected_summaries)
 
         print("OK")
 
@@ -1248,11 +1174,8 @@ Create two new files named "day" and "night" and add the "day" file to the index
 """)
 
     def check(self):
-        # Check the commits count
-        check_commits_count('simple', 11)
-
-        # Check all commits from the origin/simple branch are present.
-        check_old_commits_unchanged('origin/simple', 'simple')
+        # Check the simple branch hasn't changed.
+        check_branches_identical('origin/simple', 'simple')
 
         result = subprocess.run(['git', 'status', '--porcelain'], stdout=subprocess.PIPE, check=True)
         status = result.stdout.decode("utf-8").strip()
@@ -1349,12 +1272,9 @@ Switch to a branch named "simple".
         if 'simple' != current_branch():
             raise TaskCheckException(
                 'Current branch is not "simple", but "%s".' % current_branch())
-        
-        # Check the commits count
-        check_commits_count('simple', 11)
 
-        # Check all commits from the origin/simple branch are present.
-        check_old_commits_unchanged('origin/simple', 'simple')
+        # Check the simple branch was not modified.
+        check_branches_identical('origin/simple', 'simple')
 
         print("OK")
 
