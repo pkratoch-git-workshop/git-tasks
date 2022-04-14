@@ -1452,36 +1452,36 @@ Delete branch named `delete-branch-main`.
 def main():
     # Define tasks:
     task_classes = {
-        'cherry-pick': CherryPick,
-        'conflict-cherry-pick': ConflictCherryPick,
+        'switch': Switch,
+        'add': Add,
+        'commit': Commit,
+        'log': Log,
+        'diff': Diff,
+        'new-branch': NewBranch,
+        'delete-branch': DeleteBranch,
         'merge': Merge,
         'rebase': Rebase,
         'conflict-rebase': ConflictRebase,
+        'commit-amend': CommitAmend,
         'reset-hard': ResetHard,
         'reset-soft': ResetSoft,
         'revert': Revert,
         'conflict-revert': ConflictRevert,
+        'cherry-pick': CherryPick,
+        'conflict-cherry-pick': ConflictCherryPick,
         'change-message': ChangeMessage,
         'squash-commits': SquashCommit,
         'reorganize-commits': ReorganizeCommits,
-        'commit-amend': CommitAmend,
+        'drop': Drop,
         'stash': Stash,
         'apply-stash': ApplyStash,
-        'new-branch': NewBranch,
-        'drop': Drop,
         'blame': Blame,
-        'add': Add,
-        'commit': Commit,
-        'switch': Switch,
-        'log': Log,
-        'diff': Diff,
-        'delete-branch': DeleteBranch,
     }
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, epilog="List of tasks: \n  %s" % '\n  '.join(task_classes.keys()))
     parser.add_argument('taskname', help='Name of a task')
     parser.add_argument('command', choices=['start', 'check'], help='Command to run')
-    args = parser.parse_args()
+    args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
 
     if args.taskname not in task_classes:
         raise TaskException('Task "%s" not found.' % args.taskname)
