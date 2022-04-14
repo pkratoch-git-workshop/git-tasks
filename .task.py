@@ -1126,41 +1126,27 @@ class NewBranch(Task):
 Task: new-branch
 ================
 
-Find a commit in branch `new-branch-main` with a summary "Add commands for working with remote \
-rpositories".
-
-Create a new branch named `new-branch` on this commit.
+Create a new branch named `new-branch` starting of the `new-branch-main` branch.
 """)
 
 
     def check(self):
-        # Check branch exists
+        # Check branch exists.
         if 'new-branch' not in branch_list() and '* new-branch' not in branch_list():
             raise TaskCheckException('Branch "new-branch" does not exist.')
 
-        # Check all commits from the origin/new-branch-main branch are present.
+        # Check new-branch-main hasn't changed.
         check_old_commits_unchanged('origin/new-branch-main', 'new-branch-main')
-
-        # Check the commits count
         check_commits_count('new-branch-main', 6)
-        check_commits_count('new-branch', 4)
 
-        # Check the commit order
-        expected_summaries = [
-            'Add commands for working with remote rpositories',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
-        ]
-
-        summaries = commit_log('new-branch', FORMAT_SUMMARY)
-        if summaries != expected_summaries:
+        # Check new-branch is the same as new-branch-main.
+        try:
+            check_old_commits_unchanged('new-branch-main', 'new-branch')
+        except TaskCheckException as e:
             raise TaskCheckException(
-                'Unexpected commits in new-branch branch. '
-                'Expected summaries:\n%s' % '\n'.join(expected_summaries)
+                'The new branch is not on the top of the `new-branch-main` branch: %s' % e
             )
-
-        check_old_commits_unchanged('new-branch', 'new-branch-main')
+        check_commits_count('new-branch', 6)
 
         print("OK")
 
