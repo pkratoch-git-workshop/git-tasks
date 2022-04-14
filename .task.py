@@ -645,17 +645,15 @@ Make sure that the commit history remains unchanged, except for this one commit 
         ]
 
         main_summaries = commit_log('change-message-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of new commits in change-message-main branch differs from the '
-                'expected number. Expected commit number: %s' % (len(expected_summaries))
-            )
 
         # Check that the commit message has been changed.
         if main_summaries[1] != expected_summaries[1]:
             raise TaskCheckException(
                 'The commit message seems not be changed correctly.\nCurrent message: '
                 '%s\nExpected message: %s' % (main_summaries[1], expected_summaries[1]))
+
+        # Check summaries
+        check_summaries('change-message-tasks', expected_summaries)
 
         print("OK")
 
@@ -692,11 +690,6 @@ the branch, while the content of the branch remains unchanged.
         ]
 
         main_summaries = commit_log('squash-commits-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of new commits in squash-commits-tasks branch differs from the '
-                'expected number. Expected commit number: %s' % (len(expected_summaries))
-            )
 
         if main_summaries[0] != "Add 'Fame is a bee' by Emily Dickinson.":
             raise TaskCheckException(
@@ -754,11 +747,6 @@ The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.
         ]
 
         main_summaries = commit_log('reorganize-commits-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of new commits in this branch differs from the expected number.'
-                'Expected commit number: %s' % (len(expected_summaries))
-            )
 
         if main_summaries[0] != "Poem 2: Add a poem.":
             raise TaskCheckException(
@@ -823,11 +811,6 @@ before!
         ]
 
         main_summaries = commit_log('commit-amend-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of new commits in this branch differs from the expected number.'
-                'Expected commit number: %s' % (len(expected_summaries))
-            )
 
         if main_summaries[0] != "Add poem: Forever is composed of nows":
             raise TaskCheckException(
@@ -937,11 +920,6 @@ commit message be 'Add my favourite poem.'
         ]
 
         main_summaries = commit_log('apply-stash-tasks', FORMAT_SUMMARY)
-        if len(main_summaries) != len(expected_summaries):
-            raise TaskCheckException(
-                'The number of commits in this branch differs from the expected number.'
-                'Expected commit number: %s' % (len(expected_summaries))
-            )
 
         if main_summaries[0] != "Add my favourite poem.":
             raise TaskCheckException(
@@ -950,6 +928,9 @@ commit message be 'Add my favourite poem.'
                     expected_summaries[0], main_summaries[0]
                 )
              )
+
+        # Check summaries
+        check_summaries('apply-stash-tasks', expected_summaries)
 
         # Check that there is a difference in content between the original and the new commit.
         original = commit_show('origin/apply-stash-tasks')
