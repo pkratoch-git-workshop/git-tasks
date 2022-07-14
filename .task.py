@@ -1330,7 +1330,7 @@ Delete branch named `delete-branch-main`.
 """)
 
     def check(self):
-        if 'delete-branch-main' in branch_list():
+        if 'delete-branch-main' in branch_list() or '* delete-branch-main' in branch_list():
             raise TaskCheckException('The branch `delete-branch-main` still exists.')
 
         print("OK")
