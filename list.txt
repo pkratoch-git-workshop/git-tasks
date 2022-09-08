@@ -6,3 +6,5 @@
 * Meat
 * Sausage
 * Burgers
+* Tissue paper
+* Tooth paste
