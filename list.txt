@@ -3,3 +3,6 @@
 * Apples
 * Bananas
 * Pears
+* Meat
+* Sausage
+* Burgers
