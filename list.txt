@@ -1,2 +1,5 @@
 * Milk
 * Bread
+* Apples
+* Bananas
+* Pears
