@@ -1155,8 +1155,13 @@ Create two new files named "day" and "night" and add the "day" file to the index
 """)
 
     def check(self):
-        # Check the simple branch hasn't changed.
-        check_branches_identical('origin/simple', 'simple')
+        # Check the main branch hasn't changed.
+        try:
+            check_branches_identical('origin/main', 'main')
+        except TaskCheckException:
+            raise TaskCheckException(
+                'In this task, you should only add the file to the index, not create a commit. '
+                'To try once more, call the `start` command again.')
 
         result = subprocess.run(['git', 'status', '--porcelain'], stdout=subprocess.PIPE, check=True)
         status = result.stdout.decode("utf-8").strip()
