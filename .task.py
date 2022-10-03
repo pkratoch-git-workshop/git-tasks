@@ -439,7 +439,7 @@ Then the result should look like this:
 
 
 class ResetHard(Task):
-    branch_names = ['reset-hard-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -449,26 +449,24 @@ class ResetHard(Task):
 Task: reset-hard
 ================
 
-Reset the `reset-hard-main` branch to the point right before the last commit. Reset both the \
+Reset the `simple` branch to the point right before the last commit. Reset both the \
 index and the working tree, i.e. completely discard all changes introduced by the commit.
 
 If the history looks like this:
 
             A---B---C---D---E---F main
 
-Then the result of resetting to commit B should look like this:
+Then the result of resetting to commit E should look like this:
 
             A---B---C---D---E main
-
-(To show only task-related branches in gitk: gitk --branches=reset-hard-*)
 """)
 
     def check(self):
-        # Check all commits from the origin/reset-hard-main are present in reset-hard-main.
-        new_hexshas = commit_log('reset-hard-main')
-        new_summaries = commit_log('reset-hard-main', FORMAT_SUMMARY)
+        # Check all commits from the origin/simple are present in simple.
+        new_hexshas = commit_log('simple')
+        new_summaries = commit_log('simple', FORMAT_SUMMARY)
         skip_first = True
-        for hexsha in commit_log('origin/reset-hard-main'):
+        for hexsha in commit_log('origin/simple'):
             if skip_first:
                 skip_first = False
                 continue
@@ -482,22 +480,24 @@ Then the result of resetting to commit B should look like this:
                     )
 
         # Check the commits count
-        check_commits_count('reset-hard-main', 5)
+        check_commits_count('simple', 7)
 
         # Check the commit order
         expected_summaries = [
-            'Add explanations to the branching commands',
-            'Add basic cheatsheet for working with branches',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Fix the name of the poem: Because I could not stop for Death',
+            'Keep both versions of the poem after all',
+            'Update the poem to the newer version',
+            'Add "by" before the name of the author',
+            'Add a poem: Forever is composed of nows',
+            'Add the missing name of the author',
+            'Add the poem The Chariot',
         ]
-        check_summaries('reset-hard-main', expected_summaries)
+        check_summaries('simple', expected_summaries)
 
         print("OK")
 
 class ResetSoft(Task):
-    branch_names = ['reset-soft-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -507,19 +507,17 @@ class ResetSoft(Task):
 Task: reset-soft
 ================
 
-Reset the `reset-soft-main` branch to the point right before the last commit, but keep the index \
+Reset the `simple` branch to the point right before the last commit, but keep the index \
 and the working tree.
-
-(To show only task-related branches in gitk: gitk --branches=reset-soft-*)
 """)
 
 
     def check(self):
         # Check all commits from the origin/reset-soft-main are present in reset-soft-main.
-        new_hexshas = commit_log('reset-soft-main')
-        new_summaries = commit_log('reset-soft-main', FORMAT_SUMMARY)
+        new_hexshas = commit_log('simple')
+        new_summaries = commit_log('simple', FORMAT_SUMMARY)
         skip_first = True
-        for hexsha in commit_log('origin/reset-soft-main'):
+        for hexsha in commit_log('origin/simple'):
             if skip_first:
                 skip_first = False
                 continue
@@ -533,20 +531,22 @@ and the working tree.
                     )
 
         # Check the commits count
-        check_commits_count('reset-soft-main', 5)
+        check_commits_count('simple', 7)
 
         # Check the commit order
         expected_summaries = [
-            'Add explanations to the branching commands',
-            'Add basic cheatsheet for working with branches',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Fix the name of the poem: Because I could not stop for Death',
+            'Keep both versions of the poem after all',
+            'Update the poem to the newer version',
+            'Add "by" before the name of the author',
+            'Add a poem: Forever is composed of nows',
+            'Add the missing name of the author',
+            'Add the poem The Chariot',
         ]
-        check_summaries('reset-soft-main', expected_summaries)
+        check_summaries('simple', expected_summaries)
 
         diff_staged = git_diff('--staged')
-        diff_resetted_commit = git_diff('origin/reset-soft-main^', 'origin/reset-soft-main')
+        diff_resetted_commit = git_diff('origin/simple^', 'origin/simple')
         if diff_staged != diff_resetted_commit:
             raise TaskCheckException('The index is not the same as the resetted commit.')
 
@@ -554,7 +554,7 @@ and the working tree.
 
 
 class Revert(Task):
-    branch_names = ['revert-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -564,10 +564,10 @@ class Revert(Task):
 Task: revert
 ============
 
-In a branch `revert-main`, there is a commit with summary "Make the cheatsheet into a nice table" \
-that breaks the markdown in the cheatsheet.md file. Revert this commit.
+In a branch `simple`, there is a commit with summary "Add a poem: Forever is composed of \
+nows". Revert this commit.
 
-Note that you don't want to change the history of the `revert-main` branch, but to create new \
+Note that you don't want to change the history of the `simple` branch, but to create new \
 commit that is opposite to the one you want to undo.
 
 If the history looks like this:
@@ -577,33 +577,33 @@ If the history looks like this:
 Then the result should look like this:
 
             A---B---C---D---E---F---D' main
-
-(To show only task-related branches in gitk: gitk --branches=revert-*)
 """)
 
 
     def check(self):
-        # Check all commits from the origin/revert-main are present in revert-main.
-        check_old_commits_unchanged('origin/revert-main', 'revert-main')
+        # Check all commits from the origin/simple are present in simple.
+        check_old_commits_unchanged('origin/simple', 'simple')
 
         # Check the commits count
-        check_commits_count('revert-main', 7)
+        check_commits_count('simple', 9)
 
         # Check the commit order
         expected_summaries = [
             '<REVERT COMMIT>',
-            'Add explanations to the branching commands',
-            'Add basic cheatsheet for working with branches',
-            'Make the cheatsheet into a nice table',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Add a poem I started early',
+            'Fix the name of the poem: Because I could not stop for Death',
+            'Keep both versions of the poem after all',
+            'Update the poem to the newer version',
+            'Add "by" before the name of the author',
+            'Add a poem: Forever is composed of nows',
+            'Add the missing name of the author',
+            'Add the poem The Chariot',
         ]
-        check_summaries('revert-main', expected_summaries, skip=1)
+        check_summaries('simple', expected_summaries, skip=1)
 
         # Check the last commit is the correct reverted commit by comparing diffs
-        commits = commit_log('revert-main')
-        expected_diff = git_diff(commits[4], commits[3])
+        commits = commit_log('simple')
+        expected_diff = git_diff(commits[7], commits[6])
         revert_commit_diff = git_diff(commits[0], commits[1])
         if revert_commit_diff != expected_diff:
             raise TaskCheckException(
@@ -778,7 +778,7 @@ The final commits should be named `Poem 1: Add a poem.` and `Poem 2: Add a poem.
 
 
 class CommitAmend(Task):
-    branch_names = ["commit-amend-tasks"]
+    branch_names = ["simple"]
 
     def start(self):
         self.reset_branches()
@@ -788,41 +788,37 @@ class CommitAmend(Task):
 Task: commit-amend
 ==================
 
-In the branch `commit-amend-tasks`, there is one commit that makes up a complete poem by Emily \
-Dickinson. Unfortunately, one of the writers made a typo and left this mistake in the name of \
+In the branch `simple`, the last commit adds a poem by Emily Dickinson. \
+Unfortunately, one of the writers made a typo and left this mistake in the name of \
 the author which is `Elimy` but should be `Emily`. Before we merge the content of this branch \
-into `main`, we would like to correct the mistake before we do so.   
+into `main`, we would like to correct the mistake before we do so.
 
-Since this is only a minor change and we have already squashed all the commits in the branch, do \
-not produce an extra commit, but add the change to the existing commit instead. 
+Since this is only a minor change, do not produce an extra commit, but add the change \
+to the existing commit instead.
 
-After the change, there should be one commit only in the branch with the same commit message as \
-before!
+After the change, there should be the same number of commits in the branch with the same commit \
+messages as before!
 
 """)
 
     def check(self):
         # Check the commits count
-        check_commits_count('commit-amend-tasks', 1)
+        check_commits_count('simple', 8)
 
-        # Check the commit order.
-        expected_summaries = [
-            "Add poem: Forever is composed of nows",
-        ]
-
-        main_summaries = commit_log('commit-amend-tasks', FORMAT_SUMMARY)
-
-        if main_summaries[0] != "Add poem: Forever is composed of nows":
-            raise TaskCheckException(
-                'The message of the commit differs from what is expected.\n'
-                'Expected commit message: %s\nCurrent commit message: %s' % (
-                    expected_summaries[0], main_summaries[0]
+        # Check the summaries were not changed.
+        if commit_log('origin/simple', FORMAT_SUMMARY) != commit_log('simple', FORMAT_SUMMARY):
+            last_original = commit_log('origin/simple', FORMAT_SUMMARY)[0]
+            last_new = commit_log('simple', FORMAT_SUMMARY)[0]
+            if last_original != last_new:
+                raise TaskCheckException(
+                    'The commit messages differ from what is expected.\nExpected commit '
+                    'message: %s\nCurrent commit message: %s' % (last_original, last_new)
                 )
-             )
+            raise TaskCheckException('The commit messages on the branch `simple` changed.')
 
         # Check that there is a difference in content between the original and the new commit.
-        original = commit_show('origin/commit-amend-tasks')
-        new = commit_show('commit-amend-tasks')
+        original = commit_show('origin/simple')
+        new = commit_show('simple')
         diff = git_diff(original, new)
         if not diff:
             raise TaskCheckException(
@@ -1033,7 +1029,7 @@ Then the result should look like this:
 
 
 class NewBranch(Task):
-    branch_names = ['new-branch-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -1043,23 +1039,23 @@ class NewBranch(Task):
 Task: new-branch
 ================
 
-Create a new branch named `new-branch` starting of the `new-branch-main` branch.
+Create a new branch named `new-branch` starting of the `simple` branch.
 """)
 
 
     def check(self):
-        # Check the new-branch-main branch hasn't changed.
-        check_branches_identical('origin/new-branch-main', 'new-branch-main')
+        # Check the simple branch hasn't changed.
+        check_branches_identical('origin/simple', 'simple')
 
         # Check branch exists.
         if 'new-branch' not in branch_list() and '* new-branch' not in branch_list():
             raise TaskCheckException('Branch "new-branch" does not exist.')
 
-        # Check new-branch is the same as new-branch-main.
+        # Check new-branch is the same as simple.
         try:
-            check_branches_identical('new-branch-main', 'new-branch')
+            check_branches_identical('simple', 'new-branch')
         except TaskCheckException:
-            raise TaskCheckException('The new branch is not on the top of the `new-branch-main` branch.')
+            raise TaskCheckException('The new branch is not on the top of the `simple` branch.')
 
         print("OK")
 
@@ -1286,13 +1282,13 @@ What is the second changed line in the last but one commit?
 
     def check(self):
         answer = input("In a branch `simple`, who made the last but one commit? ")
-        if answer.strip() != "Alice":
+        if answer.strip() not in ["Dave", "dave@example.com", "Dave <dave@example.com>"]:
             raise TaskCheckException('This is not the correct answer.')
         answer = input("In a branch `simple`, what is the summary of the last but one commit? ")
-        if answer.strip() != "Add pictures to explain merge and rebase":
+        if answer.strip() != "Fix the name of the poem: Because I could not stop for Death":
             raise TaskCheckException('This is not the correct answer.')
-        answer = input("In a branch `simple`, what is the second changed line in the last but one commit? ")
-        if answer.strip() != "- Before merge:":
+        answer = input("In a branch `simple`, what line was _added_ in the last but one commit? ")
+        if answer.strip() != "Because I could not stop for Death":
             raise TaskCheckException('This is not the correct answer.')
         print("OK")
 
@@ -1322,7 +1318,7 @@ What is the difference between `diff-one` and `diff-two` branches?
 
 
 class DeleteBranch(Task):
-    branch_names = ['delete-branch-main']
+    branch_names = ['simple']
 
     def start(self):
         self.reset_branches()
@@ -1332,12 +1328,12 @@ class DeleteBranch(Task):
 Task: delete-branch
 ===================
 
-Delete branch named `delete-branch-main`.
+Delete branch named `simple`.
 """)
 
     def check(self):
-        if 'delete-branch-main' in branch_list() or '* delete-branch-main' in branch_list():
-            raise TaskCheckException('The branch `delete-branch-main` still exists.')
+        if 'simple' in branch_list() or '* simple' in branch_list():
+            raise TaskCheckException('The branch `simple` still exists.')
 
         print("OK")
 
