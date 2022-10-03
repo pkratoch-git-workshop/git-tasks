@@ -1164,14 +1164,15 @@ Create two new files named "day" and "night" and add the "day" file to the index
         untracked_files = []
         other_files = []
         for line in status.split('\n'):
-            action, file_path = line.split(' ', 1)
-            file_path = file_path.strip()
-            if action == 'A':
-                added_files.append(file_path)
-            elif action == '??':
-                untracked_files.append(file_path)
-            else:
-                other_files.append(file_path)
+            if line:
+                action, file_path = line.split(' ', 1)
+                file_path = file_path.strip()
+                if action == 'A':
+                    added_files.append(file_path)
+                elif action == '??':
+                    untracked_files.append(file_path)
+                else:
+                    other_files.append(file_path)
 
         if not added_files:
             raise TaskCheckException(
