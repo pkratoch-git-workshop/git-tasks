@@ -1,5 +1,7 @@
 THE CHARIOT
 
+*Emily Dickinson*
+
 Because I could not stop for Death,
 He kindly stopped for me;
 The carriage held but just ourselves
