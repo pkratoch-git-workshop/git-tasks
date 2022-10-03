@@ -1,6 +1,6 @@
 THE CHARIOT
 
-*Emily Dickinson*
+*By Emily Dickinson*
 
 Because I could not stop for Death,
 He kindly stopped for me;
