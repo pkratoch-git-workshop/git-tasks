@@ -959,13 +959,14 @@ class ConflictRevert(Task):
 Task: conflict-revert
 =====================
 
-In a branch `conflict-revert-main`, there is a commit with summary "Make the cheatsheet into a \
-nice table" that breaks the markdown in the cheatsheet.md file. Revert this commit.
+In a branch `conflict-revert-main`, revert the commit with summary "Add another poem: Fame is a bee".
 
 Note that you don't want to change the history of the `conflict-revert-main` branch, but to \
 create new commit that is opposite to the one you want to undo.
 
-In this scenario, you will encounter a conflict and will need to resolve it.
+In this scenario, you will encounter a conflict and will need to resolve it (and then "git add" \
+all the changes and "git revert --continue"). It is also possible that you will need to combine \
+changes from both sides of the conflict!
 
 If the history looks like this:
 
@@ -985,43 +986,51 @@ Then the result should look like this:
         check_old_commits_unchanged('origin/conflict-revert-main', 'conflict-revert-main')
 
         # Check the commits count
-        check_commits_count('conflict-revert-main', 8)
+        check_commits_count('conflict-revert-main', 4)
 
         # Check the commit order
         expected_summaries = [
             '<REVERT COMMIT>',
-            'Add picture of the basic git workflow',
-            'Add explanations to the branching commands',
-            'Add basic cheatsheet for working with branches',
-            'Make the cheatsheet into a nice table',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Fix typos in the name and author of the second poem',
+            'Add another poem: Fame is a bee',
+            'Add poems by Emily Dickinson',
         ]
         check_summaries('conflict-revert-main', expected_summaries, skip=1)
 
-        # Check the last commit is the correct reverted commit
-        expected_lines = [
-            'Git Cheatsheet',
-            '==============',
-            '- git add     - add file contents to the index',
-            '- git commit  - record changes to the repository',
-            '```',
-            '+-----------+          +---------+             +------------+',
-            '|  working  | -------> | staging | ----------> | repository |',
-            '| directory | git add  |  area   | git commit  |            |',
-            '+-----------+          +---------+             +------------+',
-            '```',
-            '- git status  - show the working tree status',
-            '- git log     - show commit logs',
-            '- git show    - show various types of objects',
-        ]
+        # Check the file contains the correct changes
         subprocess.run(['git', 'switch', 'conflict-revert-main'], check=True)
-        with open('source/cheatsheet.md') as f:
+        with open('poems.md') as f:
             lines = [line.strip() for line in f if line.strip()]
+        for line in lines:
+            if line[:7] in ["=======", "<<<<<<<", ">>>>>>>"]:
+                raise TaskCheckException(
+                    'The conflict was not resolved, there are some conflict markings '
+                    'left: %s' % line[:7]
+                )
+            if line == '# Fever – is composed of Nows':
+                raise TaskCheckException(
+                    'The conflict was not resolved correctly: the typo that was fixed '
+                    'in one of the commits is there again: # Fever – is composed of Nows'
+                )
+        expected_lines = [
+            '# Forever – is composed of Nows',
+            '*By Emily Dickinson*',
+            'Forever – is composed of Nows –',
+            '‘Tis not a different time –',
+            'Except for Infiniteness –',
+            'And Latitude of Home –',
+            'From this – experienced Here –',
+            'Remove the Dates – to These –',
+            'Let Months dissolve in further Months –',
+            'And Years – exhale in Years –',
+            'Without Debate – or Pause –',
+            'Or Celebrated Days –',
+            'No different Our Years would be',
+            'From Anno Dominies –',
+        ]
         if lines != expected_lines:
             raise TaskCheckException(
-                'The content of source/cheatsheet.md is different than expected. '
+                'The content of poems.md is different than expected. '
                 'Expected lines (without empty lines):\n%s' % '\n'.join(expected_lines)
             )
 
