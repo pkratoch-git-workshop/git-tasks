@@ -1,5 +1,7 @@
 # After great pain, a formal feeling comes
 
+*By Emily Dickinson*
+
 After great pain, a formal feeling comes –
 The Nerves sit ceremonious, like Tombs –
 The stiff Heart questions ‘was it He, that bore,’
