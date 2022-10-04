@@ -7,9 +7,9 @@ It has a song --
 It has a sting --
 Ah, too, it has a wing.
 
-# Fever – is composed of Nows
+# Forever – is composed of Nows
 
-*By Elimy Dickinson*
+*By Emily Dickinson*
 
 Forever – is composed of Nows –
 ‘Tis not a different time –
