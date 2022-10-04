@@ -125,9 +125,9 @@ class CherryPick(Task):
 Task: cherry-pick
 =================
 
-Cherry-pick into the `cherry-pick-main` branch all the commits that modified \
-`source/cheatsheet.md` file in the `cherry-pick-feature` branch that are not yet in the \
-`cherry-pick-main` branch.
+In the `cherry-pick-feature` branch, there are some commits that modified the `fame-is-a-bee.md` \
+file (and then few other commits that modified the `after-great-pain.md` file). Cherry-pick into \
+the `cherry-pick-main` branch only those that modified the `fame-is-a-bee.md`.
 
 If the history looks like this:
 
@@ -153,16 +153,15 @@ Then the result should look like this:
         check_old_commits_unchanged('origin/cherry-pick-main', 'cherry-pick-main')
 
         # Check the commits count
-        check_commits_count('cherry-pick-main', 6)
+        check_commits_count('cherry-pick-main', 5)
 
         # Check the commit order
         expected_summaries = [
-            'Escape the diagram in cheatsheet',
-            'Add picture of the basic git workflow',
-            'Add commands for working with remote rpositories',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Add the name of the author of the "Fame is a bee"',
+            'Finisth the poem "Fame is a bee"',
+            'Add the first line',
+            'Add a poem: I started Early',
+            'Add a place for poems',
         ]
         check_summaries('cherry-pick-main', expected_summaries)
 
@@ -180,9 +179,9 @@ class ConflictCherryPick(Task):
 Task: conflict-cherry-pick
 ==========================
 
-Cherry-pick into the `conflict-cherry-pick-main` branch all the commits that modified \
-`source/cheatsheet.md` file in the `conflict-cherry-pick-feature` branch that are not yet in the \
-`conflict-cherry-pick-main` branch.
+In the `conflict-cherry-pick-feature` branch, there are some commits that added the "Fame is a \
+bee" poem to the `poems.md` file (and then few other commits that added another poem). Cherry-pick \
+into the `conflict-cherry-pick-main` branch only those that added the "Fame is a bee" poem.
 
 If the history looks like this:
 
@@ -208,18 +207,39 @@ Then the result should look like this:
         check_old_commits_unchanged('origin/conflict-cherry-pick-main', 'conflict-cherry-pick-main')
 
         # Check the commits count
-        check_commits_count('conflict-cherry-pick-main', 6)
+        check_commits_count('conflict-cherry-pick-main', 3)
 
         # Check the commit order
         expected_summaries = [
-            'Escape the diagram in cheatsheet',
-            'Add picture of the basic git workflow',
-            'Add commands for working with remote rpositories',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Add the "Fame is a bee" poem',
+            'Add a title and author of "Fame is a bee"',
+            'Create a file with poems',
         ]
         check_summaries('conflict-cherry-pick-main', expected_summaries)
+
+        # Check the file contains the correct changes
+        subprocess.run(['git', 'switch', 'conflict-cherry-pick-main'], check=True)
+        with open('poems.md') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        for line in lines:
+            if line[:7] in ["=======", "<<<<<<<", ">>>>>>>"]:
+                raise TaskCheckException(
+                    'The conflict was not resolved, there are some conflict markings '
+                    'left: %s' % line[:7]
+                )
+        expected_lines = [
+            '# Fame is a bee',
+            '*By Emily Dickinson*',
+            'Fame is a bee.',
+            'It has a song --',
+            'It has a sting --',
+            'Ah, too, it has a wing.',
+        ]
+        if lines != expected_lines:
+            raise TaskCheckException(
+                'The content of poems.md is different than expected. '
+                'Expected lines (without empty lines):\n%s' % '\n'.join(expected_lines)
+            )
 
         print("OK")
 
