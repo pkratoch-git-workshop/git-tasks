@@ -4,4 +4,6 @@ Dog
 Cat
 Moose
 
-
+Milk
+Lemonade
+Beer
