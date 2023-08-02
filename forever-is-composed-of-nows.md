@@ -2,7 +2,7 @@
 
 *By Elimy Dickinson*
 
-Fever – is composed of Nows – ‘Tis not a different time –
+Forever – is composed of Nows – ‘Tis not a different time –
 Except for Infiniteness – And Latitude of Home –
 
 From this – experienced Here – Remove the Dates – to These –
