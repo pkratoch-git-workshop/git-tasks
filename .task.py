@@ -347,12 +347,12 @@ Then the result should look like this:
 
         # Check the commit order
         expected_summaries = [
-            'Add explanations to the branching commands',
-            'Add basic cheatsheet for working with branches',
-            'Add commands for working with remote rpositories',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Add a poem I started early',
+            'Update the poem to the newer version',
+            'Add "by" before the name of the author',
+            'Add a poem: Forever is composed of nows',
+            'Add the missing name of the author',
+            'Add the poem The Chariot',
         ]
         check_summaries('rebase-feature', expected_summaries)
 
@@ -402,57 +402,29 @@ Then the result should look like this:
 
         # Check the commit order
         expected_summaries = [
-            'Add commands for working with branches',
-            'Add commands for working with remote rpositories',
-            'Add explanations to individual commands',
-            'Add commands for inspecting the repo',
-            'Add cheatsheet with basic git commands',
+            'Fix a typo in the word "forever" in "Forever is composed of nows"',
+            'Split the poem "Forever is composed by nows" correctly into lines',
+            'Add a poem "I started early"',
+            'Add a poem "The Chariot"',
+            'Add a poem "Forever is composed of nows"',
         ]
         check_summaries('conflict-rebase-feature', expected_summaries)
 
-        # Check the source/cheatsheet.md file is correct
+        # Check the forever-is-composed-of-nows.md file is correct
         expected_start = [
-            "Git Cheatsheet",
-            "==============",
-            "git add     - add file contents to the index",
-            "git commit  - record changes to the repository",
-        ]
-        expected_lines = [
-            "git status  - show the working tree status",
-            "git log     - show commit logs",
-            "git show    - show various types of objects",
-            "git branch - list, create, or delete branches",
-            "git switch - switch branches",
-            "git push    - update remote refs along with associated objects",
-            "git fetch   - download objects and refs from another repository",
+            "# Forever – is composed of Nows",
+            "*By Elimy Dickinson*",
+            "Forever – is composed of Nows –",
+            "‘Tis not a different time –",
         ]
         if current_branch() != 'conflict-rebase-feature':
             switch_branch('conflict-rebase-feature')
-        with open('source/cheatsheet.md') as f:
+        with open('forever-is-composed-of-nows.md') as f:
             lines = [line.strip() for line in f if line.strip()]
         if lines[:4] != expected_start:
             raise TaskCheckException(
-                'The content of source/cheatsheet.md is different than expected. '
+                'The content of forever-is-composed-of-nows.md is different than expected. '
                 'It should start with (without empty lines):\n%s' % '\n'.join(expected_start)
-            )
-        if sorted(lines[4:]) != sorted(expected_lines):
-            raise TaskCheckException(
-                'The content of source/cheatsheet.md is different than expected. Expected '
-                'lines (without empty lines):\n%s' % '\n'.join(expected_start + expected_lines)
-            )
-
-        # Check the last commit adds only commands for working with branches 
-        expected_added_commands = [
-            "+git branch - list, create, or delete branches",
-            "+git switch - switch branches",
-        ]
-        diff_last_commit = git_diff('conflict-rebase-feature^', 'conflict-rebase-feature').split('\n')
-        added_commands = [line for line in diff_last_commit if line.startswith("+git")]
-        removed_commands = [line for line in diff_last_commit if line.startswith("-git")]
-        if removed_commands or sorted(added_commands) != expected_added_commands:
-            raise TaskCheckException(
-                'The last commit should only add commands for working with branches. '
-                'Expected added commands:\n%s' % '\n'.join(expected_added_commands)
             )
 
         print("OK")
