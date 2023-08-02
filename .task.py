@@ -1062,6 +1062,7 @@ class NewBranch(Task):
 
     def start(self):
         self.reset_branches()
+        subprocess.run(['git', 'branch', '-D', 'new-branch'])
 
         print("""
 ================
@@ -1240,7 +1241,7 @@ Then create a new file named "new-file" and commit it.
 
     def check(self):
         # Check the commits count
-        check_commits_count('simple', 12)
+        check_commits_count('simple', 9)
 
         # Check all commits from the origin/simple branch are present.
         check_old_commits_unchanged('origin/simple', 'simple')
@@ -1306,7 +1307,7 @@ In a branch `simple`, who made the last but one commit?
 
 What is the summary of the last but one commit?
 
-What is the second changed line in the last but one commit?
+What line was added in the last but one commit?
 """)
 
     def check(self):
