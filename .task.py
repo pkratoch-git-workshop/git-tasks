@@ -1280,18 +1280,26 @@ In a branch `simple`, who made the last but one commit?
 What is the summary of the last but one commit?
 
 What line was added in the last but one commit?
+
+In the check, you will be prompted for the answers to all these questions.
 """)
 
     def check(self):
         answer = input("In a branch `simple`, who made the last but one commit? ")
-        if answer.strip() not in ["Dave", "dave@example.com", "Dave <dave@example.com>"]:
+        if answer.strip() not in ["Dave", "dave", "dave@example.com", "Dave <dave@example.com>"]:
             raise TaskCheckException('This is not the correct answer.')
         answer = input("In a branch `simple`, what is the summary of the last but one commit? ")
         if answer.strip() != "Fix the name of the poem: Because I could not stop for Death":
             raise TaskCheckException('This is not the correct answer.')
         answer = input("In a branch `simple`, what line was _added_ in the last but one commit? ")
         if answer.strip() != "Because I could not stop for Death":
-            raise TaskCheckException('This is not the correct answer.')
+            if answer.strip() == "+Because I could not stop for Death":
+                raise TaskCheckException(
+                    "Almost. The '+' sign only denotes that the line was added, "
+                    "but it's not part of the added line itself."
+                )
+            else:
+                raise TaskCheckException('This is not the correct answer.')
         print("OK")
 
 
